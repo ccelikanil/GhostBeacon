@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import os
+import signal
 import subprocess
 import re
 import time
@@ -7,8 +9,11 @@ import time
 # Global Variables
 
 changedCards = []
+processes = []
 wirelessInterfaces = []
 operatingMode = ''
+savedFile = ''
+processID = ''
 
 def checkRequirements():
 	try:
@@ -17,6 +22,10 @@ def checkRequirements():
 		
 		subprocess.check_call(['which', "mdk4"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		print("[+] mdk4 is already installed, script can continue.")
+		
+		subprocess.check_call(['which', "gnome-terminal"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		print("[+] gnome-terminal is already installed, script can continue.")
+		
 		print("\n######################################################\n")
 	
 	except (OSError, subprocess.CalledProcessError):
@@ -87,9 +96,47 @@ def changeOperatingMode():
 		
 	print("\n######################################################\n")
 	
+def spotFakeAP():
+	global savedFile
+	global processID
+	global processes
+
+	print("Fake AP Spotter Module is selected. Select an interface to spawn new terminal for \"airodump-ng\":")
+
+	# add card selection feature
+
+	savedFile = os.popen("date +%Y-%m-%d_%H-%M-%S | base64").read().strip() 
+
+	spawnMonitor = f"airodump-ng {wirelessInterfaces[1]} --band abg -w {savedFile}"
+	process = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
+
+	processes.append(process.pid)
+	print("processID: " + str(process.pid))
+	stdout, stderr = process.communicate()
+	time.sleep(5)
+	process.kill()
+
+
+	
+def spotHiddenAP():
+	print("""
+	
+	######################################################
+		      
+		     Hidden Access Point Spotter
+		      
+	######################################################
+	
+	""")	
+	
+	
 def safeExit():
+	for i in range(len(processes)):
+		#print(f"processID to be killed: {processes[i]}")
+		os.kill(processes[i], signal.SIGTERM) #NOT WORKING
+
 	for i in range(len(changedCards)):
-		message = "Restoring Wireless Interface " + str(i+1) +  " to \"Managed Mode\""
+		message = "\nRestoring Wireless Interface " + str(i+1) +  " to \"Managed Mode\""
 		
 		for char in message:
 			print(char, end="", flush = True)
@@ -101,32 +148,6 @@ def safeExit():
 		subprocess.call(['sudo', 'ifconfig', changedCards[i], 'up'])
 		
 		print("\n[+] Wireless Interface " + str(i+1) + " restored to \"Managed Mode\"!")
-
-def spotFakeAP():
-	print("""
-	
-	######################################################
-		      
-		      Fake Access Point Spotter
-		      
-	######################################################
-	
-	""")
-	
-	
-	
-def spotHiddenAP():
-	print("""
-	
-	######################################################
-		      
-		     Hidden Access Point Spotter
-		      
-	######################################################
-	
-	""")
-		
-	
 
 def main():
 	
@@ -151,6 +172,7 @@ def main():
 	checkRequirements()
 	listInterfaces()
 	changeOperatingMode()
+	spotFakeAP()
 	
 	safeExit()
 	
