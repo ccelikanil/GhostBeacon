@@ -4,6 +4,8 @@ import subprocess
 import re
 import time
 
+# Global Variables
+
 changedCards = []
 wirelessInterfaces = []
 operatingMode = ''
@@ -99,6 +101,32 @@ def safeExit():
 		subprocess.call(['sudo', 'ifconfig', changedCards[i], 'up'])
 		
 		print("\n[+] Wireless Interface " + str(i+1) + " restored to \"Managed Mode\"!")
+
+def spotFakeAP():
+	print("""
+	
+	######################################################
+		      
+		      Fake Access Point Spotter
+		      
+	######################################################
+	
+	""")
+	
+	
+	
+def spotHiddenAP():
+	print("""
+	
+	######################################################
+		      
+		     Hidden Access Point Spotter
+		      
+	######################################################
+	
+	""")
+		
+	
 
 def main():
 	
