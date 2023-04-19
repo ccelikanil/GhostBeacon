@@ -5,6 +5,8 @@ import signal
 import subprocess
 import re
 import time
+import datetime
+from scapy.all import *
 
 # Global Variables
 
@@ -74,7 +76,7 @@ def changeOperatingMode():
 				message = "Putting in monitor mode..."
 				
 				for char in message:
-					print(char, end="", flush = True)
+					print(char, end = "", flush = True)
 					time.sleep(0.05)
 				print()
 				
@@ -101,21 +103,66 @@ def spotFakeAP():
 	global processID
 	global processes
 
-	print("Fake AP Spotter Module is selected. Select an interface to spawn new terminal for \"airodump-ng\":")
+	print("Fake AP Spotter Module is selected.\"airodump-ng\" window is spawning...")
 
 	# add card selection feature
 
 	savedFile = os.popen("date +%Y-%m-%d_%H-%M-%S | base64").read().strip() 
 
-	spawnMonitor = f"airodump-ng {wirelessInterfaces[1]} --band abg -w {savedFile}"
-	process = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
-
-	processes.append(process.pid)
-	print("processID: " + str(process.pid))
-	stdout, stderr = process.communicate()
+	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write {savedFile}"
+	airodumpProcess = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
+	processID = airodumpProcess.pid
+	processes.append(processID)
+	#stdout, stderr = airodumpProcess.communicate()
 	time.sleep(5)
-	process.kill()
+	
+	#os.kill(processID, signal.SIGTERM)	# now it's unnecessary but let it stay until first release
 
+	print("\n[!] At this point, you have to provide an SSID (preferably, your own SSID) to check whether there is a suspicious (fake) SSID is present.")
+	print("[!] Optionally, you may enter your BSSID value to seperate your original AP from others (if there is any)") 
+	
+	ssid = input("\nEnter target SSID: ")
+	
+	# Check whether given input is a valid BSSID
+	bssid_pattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
+	
+	print("\n[!] Do you want to enter BSSID? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
+	answer = input().lower()
+	
+	while answer not in ['y', 'n']:
+    		answer = input("\nInvalid input. Please enter 'y' or 'n': ").lower()
+	
+	if answer == 'y':
+		while True:
+			bssid = input("\nEnter BSSID of original AP: ")
+			
+			if len(bssid) == 17 and bssid_pattern.match(bssid):
+				break
+
+			else:
+				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
+    	
+	with open(f"{savedFile}-01.csv", "r") as f:
+		for line in f.readlines():
+			if ssid in line:
+				print(f"Found SSID {ssid}!")
+				
+				firstSeen = line.split(',')[1]
+				firstSeenConv = datetime.datetime.strptime(firstSeen, '%Y-%m-%d %H:%M:%S')		# BUG
+				print(firstSeenConv)
+				
+				currentDate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+				currentDateConv = datetime.datetime.strptime(currentDate, '%Y-%m-%d %H:%M:%S')		# BUG
+				
+				uptime = currentDateConv - firstSeenConv
+				
+				print(f'The SSID {ssid} has been up for {uptime}')
+								
+				break
+			else:
+				print("SSID not found!")
+    	
+	
 
 	
 def spotHiddenAP():
@@ -131,15 +178,28 @@ def spotHiddenAP():
 	
 	
 def safeExit():
+	# Kill spawned processes
+	
 	for i in range(len(processes)):
-		#print(f"processID to be killed: {processes[i]}")
-		os.kill(processes[i], signal.SIGTERM) #NOT WORKING
+		message = "\nKilling processes...\n"
+		
+		for char in message:
+			print(char, end = "", flush = True)
+			time.sleep(0.05)
+		
+		print()
+		
+		subprocess.call(['pkill', 'gnome-terminal'])
+		
+		print("DONE!")
+
+	# Restore card interfaces
 
 	for i in range(len(changedCards)):
 		message = "\nRestoring Wireless Interface " + str(i+1) +  " to \"Managed Mode\""
 		
 		for char in message:
-			print(char, end="", flush = True)
+			print(char, end = "", flush = True)
 			time.sleep(0.05)
 		print()
 		
