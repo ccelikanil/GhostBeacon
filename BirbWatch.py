@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
 import os
+import pytz
+import re
 import signal
 import subprocess
-import re
 import time
-import datetime
+from  datetime import datetime, timedelta
 from scapy.all import *
 
 # Global Variables
@@ -16,6 +17,7 @@ wirelessInterfaces = []
 operatingMode = ''
 savedFile = ''
 processID = ''
+ssidFound = False
 
 def checkRequirements():
 	try:
@@ -93,7 +95,7 @@ def changeOperatingMode():
 				changeOperatingMode()
 				
 		else:
-			print("[+] Interface " + str(i+1) + " is in \"Monitor Mode\".")
+			print("[!] Interface " + str(i+1) + " is in \"Monitor Mode\".")
 	
 		
 	print("\n######################################################\n")
@@ -102,6 +104,9 @@ def spotFakeAP():
 	global savedFile
 	global processID
 	global processes
+	global ssidFound
+	
+	ssidCapabilities = {}
 
 	print("Fake AP Spotter Module is selected.\"airodump-ng\" window is spawning...")
 
@@ -126,7 +131,7 @@ def spotFakeAP():
 	# Check whether given input is a valid BSSID
 	bssid_pattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
 	
-	print("\n[!] Do you want to enter BSSID? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
+	print("\n[!] Do you want to enter BSSID to exclude your own AP? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
 	answer = input().lower()
 	
 	while answer not in ['y', 'n']:
@@ -142,29 +147,31 @@ def spotFakeAP():
 			else:
 				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
     	
-	with open(f"{savedFile}-01.csv", "r") as f:
-		for line in f.readlines():
-			if ssid in line:
-				print(f"Found SSID {ssid}!")
+	def checkBeacon(packet):
+		global ssidFound
+		
+		if packet.haslayer(Dot11Beacon):
+			if packet.info.decode('utf-8') == ssid and not ssidFound:
+				ssidFound = True
+				ssidCapabilities[ssid] = packet[Dot11Beacon].cap	# store unique SSID's to ssidCapabilities list	
 				
-				firstSeen = line.split(',')[1]
-				firstSeenConv = datetime.datetime.strptime(firstSeen, '%Y-%m-%d %H:%M:%S')		# BUG
-				print(firstSeenConv)
+				bssid = packet[Dot11].addr3.upper()
 				
-				currentDate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-				currentDateConv = datetime.datetime.strptime(currentDate, '%Y-%m-%d %H:%M:%S')		# BUG
+				# --- Calculate Uptime ---
 				
-				uptime = currentDateConv - firstSeenConv
-				
-				print(f'The SSID {ssid} has been up for {uptime}')
-								
-				break
-			else:
-				print("SSID not found!")
-    	
-	
+				timestamp = packet[Dot11].timestamp
 
-	
+				epoch = datetime.utcfromtimestamp(0)
+				beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch | ALL THE FUCKING PROBLEM WAS microseconds=timestamp :))))))))
+				uptime = beaconTime - epoch
+				uptimeStr = str(uptime).split('.')[0]
+				
+				# --- Calculate Uptime ---	
+				
+				print(f"[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+		
+	sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
+    	
 def spotHiddenAP():
 	print("""
 	
