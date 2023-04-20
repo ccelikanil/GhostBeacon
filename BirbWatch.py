@@ -129,7 +129,7 @@ def spotFakeAP():
 	ssid = input("\nEnter target SSID: ")
 	
 	# Check whether given input is a valid BSSID
-	bssid_pattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
+	bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
 	
 	print("\n[!] Do you want to enter BSSID to exclude your own AP? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
 	answer = input().lower()
@@ -141,7 +141,7 @@ def spotFakeAP():
 		while True:
 			bssid = input("\nEnter BSSID of original AP: ")
 			
-			if len(bssid) == 17 and bssid_pattern.match(bssid):
+			if len(bssid) == 17 and bssidPattern.match(bssid):
 				break
 
 			else:
