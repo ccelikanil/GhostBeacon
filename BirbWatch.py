@@ -18,6 +18,9 @@ operatingMode = ''
 savedFile = ''
 processID = ''
 ssidFound = False
+ssid = ''
+bssid = ''
+ssidCapabilities = {}
 
 def checkRequirements():
 	try:
@@ -100,11 +103,50 @@ def changeOperatingMode():
 		
 	print("\n######################################################\n")
 	
+def checkBeacon(packet):
+	global ssidFound
+		
+	if packet.haslayer(Dot11Beacon):
+		if packet.info.decode('utf-8') == ssid and not ssidFound:
+			ssidFound = True
+			ssidCapabilities[ssid] = packet[Dot11Beacon].cap	# store unique SSID's to ssidCapabilities list	
+			
+			bssid = packet[Dot11].addr3.upper()
+				
+			# --- Calculate Uptime ---
+				
+			timestamp = packet[Dot11].timestamp
+
+			epoch = datetime.utcfromtimestamp(0)
+			beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch | ALL THE FUCKING PROBLEM WAS microseconds=timestamp :))))))))
+			uptime = beaconTime - epoch
+			uptimeStr = str(uptime).split('.')[0]
+				
+			# --- Calculate Uptime ---	
+			
+			print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+			
+			searchAgain = input("Do you want to search for another SSID with the same name? (y/n): ")
+			
+			while searchAgain not in ['y', 'n']:
+    				searchAgain = input("Invalid input. Please enter 'y' or 'n': ").lower()
+			
+			if searchAgain.lower() == 'y':
+				ssidFound = False
+				if bssid in ssidCapabilities and ssidCapabilities[bssid] != packet[Dot11Beacon].cap:
+					print("if executed")
+					print(f"[+] Found another SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")		# CALCULATE UPTIME AGAIN FOR OTHER APs w/SAME SSID
+			else:
+				print("OK.")
+
 def spotFakeAP():
 	global savedFile
 	global processID
 	global processes
 	global ssidFound
+	global ssid
+	global bssid
+	global ssidCapabilities
 	
 	ssidCapabilities = {}
 
@@ -147,28 +189,8 @@ def spotFakeAP():
 			else:
 				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
     	
-	def checkBeacon(packet):
-		global ssidFound
-		
-		if packet.haslayer(Dot11Beacon):
-			if packet.info.decode('utf-8') == ssid and not ssidFound:
-				ssidFound = True
-				ssidCapabilities[ssid] = packet[Dot11Beacon].cap	# store unique SSID's to ssidCapabilities list	
-				
-				bssid = packet[Dot11].addr3.upper()
-				
-				# --- Calculate Uptime ---
-				
-				timestamp = packet[Dot11].timestamp
-
-				epoch = datetime.utcfromtimestamp(0)
-				beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch | ALL THE FUCKING PROBLEM WAS microseconds=timestamp :))))))))
-				uptime = beaconTime - epoch
-				uptimeStr = str(uptime).split('.')[0]
-				
-				# --- Calculate Uptime ---	
-				
-				print(f"[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+	print("\n[!] Reading Beacons, please wait.\n")
+    	
 		
 	sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
     	
