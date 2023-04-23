@@ -21,6 +21,7 @@ ssidFound = False
 ssid = ''
 bssid = ''
 ssidCapabilities = {}
+uniqueBSSID = []
 
 def checkRequirements():
 	try:
@@ -105,6 +106,7 @@ def changeOperatingMode():
 	
 def checkBeacon(packet):
 	global ssidFound
+	global uniqueBSSID
 		
 	if packet.haslayer(Dot11Beacon):
 		if packet.info.decode('utf-8') == ssid and not ssidFound:
@@ -118,26 +120,42 @@ def checkBeacon(packet):
 			timestamp = packet[Dot11].timestamp
 
 			epoch = datetime.utcfromtimestamp(0)
-			beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch | ALL THE FUCKING PROBLEM WAS microseconds=timestamp :))))))))
+			beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch
 			uptime = beaconTime - epoch
 			uptimeStr = str(uptime).split('.')[0]
 				
 			# --- Calculate Uptime ---	
 			
-			print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+			if bssid not in [x[0] for x in uniqueBSSID]:
+				print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+				
+				searchAgain = input("Do you want to search for another SSID with the same name? (y/n): ")
+				
+				while searchAgain not in ['y', 'n']:
+    					searchAgain = input("Invalid input. Please enter 'y' or 'n': ").lower()
 			
-			searchAgain = input("Do you want to search for another SSID with the same name? (y/n): ")
+				if searchAgain.lower() == 'y':					
+					if bssid not in [x[0] for x in uniqueBSSID]:
+						print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
+						uniqueBSSID.append((bssid, uptimeStr))
+						
+						# add timeout check for "no new beacons"
+						
+					ssidFound = False
 			
-			while searchAgain not in ['y', 'n']:
-    				searchAgain = input("Invalid input. Please enter 'y' or 'n': ").lower()
-			
-			if searchAgain.lower() == 'y':
+				else:
+					i = 1
+					
+					print("Here's what we got:")
+					
+					for bssid, bssid_uptime in uniqueBSSID:
+						print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
+						i += 1
+				
+				uptimeStr = ''	# reset uptime value for each bssid
+	
+			elif bssid in [x[0] for x in uniqueBSSID]:
 				ssidFound = False
-				if bssid in ssidCapabilities and ssidCapabilities[bssid] != packet[Dot11Beacon].cap:
-					print("if executed")
-					print(f"[+] Found another SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")		# CALCULATE UPTIME AGAIN FOR OTHER APs w/SAME SSID
-			else:
-				print("OK.")
 
 def spotFakeAP():
 	global savedFile
