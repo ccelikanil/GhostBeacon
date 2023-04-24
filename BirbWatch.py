@@ -104,10 +104,10 @@ def changeOperatingMode():
 		
 	print("\n######################################################\n")
 	
-def checkBeacon(packet):
+def checkBeacon(packet, beaconTimeout = 20):
 	global ssidFound
 	global uniqueBSSID
-		
+	
 	if packet.haslayer(Dot11Beacon):
 		if packet.info.decode('utf-8') == ssid and not ssidFound:
 			ssidFound = True
@@ -129,17 +129,10 @@ def checkBeacon(packet):
 			if bssid not in [x[0] for x in uniqueBSSID]:
 				print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
 				
-				searchAgain = input("Do you want to search for another SSID with the same name? (y/n): ")
 				
-				while searchAgain not in ['y', 'n']:
-    					searchAgain = input("Invalid input. Please enter 'y' or 'n': ").lower()
-			
-				if searchAgain.lower() == 'y':					
-					if bssid not in [x[0] for x in uniqueBSSID]:
-						print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
-						uniqueBSSID.append((bssid, uptimeStr))
-						
-						# add timeout check for "no new beacons"
+				if bssid not in [x[0] for x in uniqueBSSID]:
+					print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
+					uniqueBSSID.append((bssid, uptimeStr))
 						
 					ssidFound = False
 			
@@ -209,7 +202,6 @@ def spotFakeAP():
     	
 	print("\n[!] Reading Beacons, please wait.\n")
     	
-		
 	sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
     	
 def spotHiddenAP():
