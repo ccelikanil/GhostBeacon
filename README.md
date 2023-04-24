@@ -34,12 +34,12 @@
 ```                                                                                                                 
 
 
-# CLI-based 802.11 Hidden AP & Fake AP Spotter
+# CLI-based 802.11 Hidden AP & Rogue (Fake) AP Spotter
 
 ## Features:
 
 1. 802.11 Hidden Access Point Spotter
-2. 802.11 Fake (Rogue) Access Point Spotter
+2. 802.11 Rogue (Fake) Access Point Spotter
 
 ## How it works?
 
