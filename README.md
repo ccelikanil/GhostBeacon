@@ -34,4 +34,4 @@
 ```                                                                                                                 
 
 
-CLI-based 802.11 Hidden &amp; Fake AP Spotter
+# CLI-based 802.11 Hidden AP & Fake AP Spotter
