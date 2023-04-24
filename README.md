@@ -24,16 +24,11 @@
 	/ (    __,--~ _.._""~~~~"" ,-"  "-.`\     /~.-"
 	`._"--~_,.--"~    \       /        \ `---' /
 	   "~""            \     /          "-.__,/
-					               `L   ]'
-						               l   !
-						               j___L             
-					               (_____)
-						               |   |
-
-------------------------------------------------
-Thank you for visiting https://asciiart.website/
-This ASCII pic can be found at
-https://asciiart.website/index.php?art=animals/birds%20(land)
+					   `L   ]'
+						l   !
+						j___L            
+					   (_____)
+						|   |
 
 ```                                                                                                                 
 
