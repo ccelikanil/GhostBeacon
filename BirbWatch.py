@@ -4,6 +4,7 @@ import os
 import pytz
 import re
 import signal
+import sys
 import subprocess
 import time
 from  datetime import datetime, timedelta
@@ -104,52 +105,59 @@ def changeOperatingMode():
 		
 	print("\n######################################################\n")
 	
-def checkBeacon(packet, beaconTimeout = 20):
+class BeaconSignalReceived(Exception):
+    pass
+
+def checkBeacon(packet):
 	global ssidFound
 	global uniqueBSSID
-	
+    
+	def signalHandler(sig, frame):
+		i = 1 
+		
+		for bssid, bssid_uptime in uniqueBSSID:
+			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
+			i += 1
+		
+		raise BeaconSignalReceived("Beacon signal received!")
+    
+	signal.signal(signal.SIGINT, signalHandler)
+    
 	if packet.haslayer(Dot11Beacon):
 		if packet.info.decode('utf-8') == ssid and not ssidFound:
 			ssidFound = True
-			ssidCapabilities[ssid] = packet[Dot11Beacon].cap	# store unique SSID's to ssidCapabilities list	
-			
-			bssid = packet[Dot11].addr3.upper()
-				
-			# --- Calculate Uptime ---
-				
-			timestamp = packet[Dot11].timestamp
+			ssidCapabilities[ssid] = packet[Dot11Beacon].cap    # store unique SSID's to ssidCapabilities list    
 
+			bssid = packet[Dot11].addr3.upper()
+                
+			# --- Calculate Uptime ---
+                
+			timestamp = packet[Dot11].timestamp
 			epoch = datetime.utcfromtimestamp(0)
-			beaconTime = epoch + timedelta(microseconds=timestamp)	# actual uptime + epoch
+			beaconTime = epoch + timedelta(microseconds=timestamp)    # actual uptime + epoch
 			uptime = beaconTime - epoch
 			uptimeStr = str(uptime).split('.')[0]
-				
-			# --- Calculate Uptime ---	
+
+			# --- Calculate Uptime ---
 			
+			# Get encryption capabilities
+			
+			# Get TX
+            
 			if bssid not in [x[0] for x in uniqueBSSID]:
 				print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
-				
-				
+
 				if bssid not in [x[0] for x in uniqueBSSID]:
 					print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
 					uniqueBSSID.append((bssid, uptimeStr))
-						
+					
 					ssidFound = False
-			
-				else:
-					i = 1
-					
-					print("Here's what we got:")
-					
-					for bssid, bssid_uptime in uniqueBSSID:
-						print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
-						i += 1
-				
-				uptimeStr = ''	# reset uptime value for each bssid
-	
+                
+				uptimeStr = ''    # reset uptime value for each bssid
+
 			elif bssid in [x[0] for x in uniqueBSSID]:
 				ssidFound = False
-
+				
 def spotFakeAP():
 	global savedFile
 	global processID
@@ -202,8 +210,18 @@ def spotFakeAP():
     	
 	print("\n[!] Reading Beacons, please wait.\n")
     	
-	sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
-    	
+	try:
+		sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
+		
+	except BeaconSignalReceived:
+		message = "\nFinding Rogue/Fake APs...\n"
+		
+		for char in message:
+			print(char, end = "", flush = True)
+			time.sleep(0.05)
+		
+		print()
+	    	
 def spotHiddenAP():
 	print("""
 	
