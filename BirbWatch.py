@@ -143,6 +143,14 @@ def checkBeacon(packet):
 			# Get encryption capabilities
 			
 			# Get TX
+			
+			minUptime = uniqueBSSID[0]
+			minBSSID = None
+			
+			for bssid, uptime in uniqueBSSID:
+				if uptime < minUptime:
+					minUptime = uptime
+					minBSSID = bssid
             
 			if bssid not in [x[0] for x in uniqueBSSID]:
 				print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
@@ -180,7 +188,7 @@ def spotFakeAP():
 	processID = airodumpProcess.pid
 	processes.append(processID)
 	#stdout, stderr = airodumpProcess.communicate()
-	time.sleep(5)
+	time.sleep(3)
 	
 	#os.kill(processID, signal.SIGTERM)	# now it's unnecessary but let it stay until first release
 
@@ -208,10 +216,23 @@ def spotFakeAP():
 			else:
 				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
     	
+	timeout = int(input("\nEnter a value to set a timeout value for reading Beacons (in seconds): ")) # read packets for X seconds --this will be improved to "stop reading if there are no new beacons for X seconds"
+    	
 	print("\n[!] Reading Beacons, please wait.\n")
     	
 	try:
-		sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0)
+		sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0, timeout=timeout)
+		
+		i = 1
+		
+		print(f"\n[!] Beacon reading is completed!")
+		print(f"\n[!] SSID \"{ssid}\" with all unique BSSIDs:\n")
+		
+		for bssid, bssid_uptime in uniqueBSSID:
+			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
+			i += 1
+		
+		compareBSSIDUptime()
 		
 	except BeaconSignalReceived:
 		message = "\nFinding Rogue/Fake APs...\n"
