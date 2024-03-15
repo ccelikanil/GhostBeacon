@@ -7,7 +7,7 @@ import signal
 import sys
 import subprocess
 import time
-from  datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from scapy.all import *
 
 # Global Variables
@@ -27,13 +27,13 @@ uniqueBSSID = []
 def checkRequirements():
 	try:
 		subprocess.check_call(['which', 'aircrack-ng'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		print("[+] aircrack-ng suite is already installed, script can continue.")
+		print("\033[92m[+] aircrack-ng suite is already installed, script can continue.\033[0m")
 		
 		subprocess.check_call(['which', "mdk4"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		print("[+] mdk4 is already installed, script can continue.")
+		print("\033[92m[+] mdk4 is already installed, script can continue.\033[0m")
 		
 		subprocess.check_call(['which', "gnome-terminal"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		print("[+] gnome-terminal is already installed, script can continue.")
+		print("\033[92m[+] gnome-terminal is already installed, script can continue.\033[0m")
 		
 		print("\n######################################################\n")
 	
@@ -60,7 +60,7 @@ def listInterfaces():
 	print("Wireless Interfaces List (Total : " + str(numberofCards) +")\n")
 
 	if not wirelessInterfaces:
-		print("Error: No wireless interfaces found.")
+		print("\033[91mError: No wireless interfaces found.\033[0m")
 	
 	else:
 		for i in range(len(wirelessInterfaces)):
@@ -93,14 +93,14 @@ def changeOperatingMode():
 				
 				changedCards.append(wirelessInterfaces[i])
     				
-				print("\n[+] Wireless Interface " + str(i+1) + " now is in \"Monitor Mode\".")
+				print("\n\033[92m[+] Wireless Interface " + str(i+1) + " now is in \"Monitor Mode\".\033[0m")
 				
 			elif (changeOperation == 'n'):
-				print("\nWireless Interface " + str(i+1) + " needs to be in \"Monitor Mode\" to continue!!")
+				print("\n\033[91m[!] Wireless Interface " + str(i+1) + " needs to be in \"Monitor Mode\" to continue!!\033[0m")
 				changeOperatingMode()
 				
 		else:
-			print("[!] Interface " + str(i+1) + " is in \"Monitor Mode\".")
+			print("\033[92m[!] Interface " + str(i+1) + " is in \"Monitor Mode\".\033[0m")
 	
 		
 	print("\n######################################################\n")
@@ -111,16 +111,17 @@ class BeaconSignalReceived(Exception):
 def checkBeacon(packet):
 	global ssidFound
 	global uniqueBSSID
+	global ssidCapabilities
     
 	def signalHandler(sig, frame):
 		i = 1 
-		
+
 		for bssid, bssid_uptime in uniqueBSSID:
 			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
 			i += 1
-		
+
 		raise BeaconSignalReceived("Beacon signal received!")
-    
+
 	signal.signal(signal.SIGINT, signalHandler)
     
 	if packet.haslayer(Dot11Beacon):
@@ -130,7 +131,7 @@ def checkBeacon(packet):
 
 			bssid = packet[Dot11].addr3.upper()
                 
-			# --- Calculate Uptime ---
+            # Calculate & Sort Uptime ---
                 
 			timestamp = packet[Dot11].timestamp
 			epoch = datetime.utcfromtimestamp(0)
@@ -138,34 +139,47 @@ def checkBeacon(packet):
 			uptime = beaconTime - epoch
 			uptimeStr = str(uptime).split('.')[0]
 
-			# --- Calculate Uptime ---
+			if len(uniqueBSSID) > 1:									
+				minUptimeBSSID, minUptime = min(uniqueBSSID, key=lambda x: x[1])	# sort uptimes
+                
+				print("\n[!] Comparing BSSID uptimes:\n")
+            
+				for bssid, uptime in uniqueBSSID:
+					if bssid == minUptimeBSSID:
+						print(f"\033[91m[!] BSSID: {bssid}, Uptime: {uptime} (AP w/Minimum Uptime!)\033[0m")
+			else:
+				print("\n\033[92m[!] Only one BSSID found!\033[0m")
+                        
+            # Get encryption capabilities
+            
+			if "privacy" not in (ssidCapabilities[ssid].flagrepr()): # check if beacon's privacy bit is 0
+				print("\033[91m[!] AP has no encryption (OPN)!\033[0m")
 			
-			# Get encryption capabilities
+			else:
+				print("\033[90m[!] AP has encryption (WEP/WPA/2/3)\033[0m")
+
+            # Check OUI
+
+			############################
 			
 			# Get TX
-			
-			minUptime = uniqueBSSID[0]
-			minBSSID = None
-			
-			for bssid, uptime in uniqueBSSID:
-				if uptime < minUptime:
-					minUptime = uptime
-					minBSSID = bssid
+
+			############################
             
 			if bssid not in [x[0] for x in uniqueBSSID]:
-				print(f"\n[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}")
+				print(f"\n\033[92m[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}\033[0m")
 
 				if bssid not in [x[0] for x in uniqueBSSID]:
 					print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
 					uniqueBSSID.append((bssid, uptimeStr))
-					
+                    
 					ssidFound = False
                 
 				uptimeStr = ''    # reset uptime value for each bssid
 
 			elif bssid in [x[0] for x in uniqueBSSID]:
 				ssidFound = False
-				
+
 def spotFakeAP():
 	global savedFile
 	global processID
@@ -174,73 +188,74 @@ def spotFakeAP():
 	global ssid
 	global bssid
 	global ssidCapabilities
-	
+	global uniqueBSSID
+    
 	ssidCapabilities = {}
+	uniqueBSSID = []
 
-	print("Fake AP Spotter Module is selected.\"airodump-ng\" window is spawning...")
+	print("Fake AP Spotter Module is selected. \"airodump-ng\" window is spawning...")
 
 	# add card selection feature
 
-	savedFile = os.popen("date +%Y-%m-%d_%H-%M-%S | base64").read().strip() 
+	savedFile = os.popen("date +%Y-%m-%d_%H-%M-%S").read().strip() 
 
-	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write {savedFile}"
+	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write beacons/{savedFile}"
 	airodumpProcess = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
 	processID = airodumpProcess.pid
 	processes.append(processID)
 	#stdout, stderr = airodumpProcess.communicate()
-	time.sleep(3)
-	
-	#os.kill(processID, signal.SIGTERM)	# now it's unnecessary but let it stay until first release
+	time.sleep(5)
+    
+	#os.kill(processID, signal.SIGTERM)    # now it's unnecessary but let it stay until first release
 
-	print("\n[!] At this point, you have to provide an SSID (preferably, your own SSID) to check whether there is a suspicious (fake) SSID is present.")
-	print("[!] Optionally, you may enter your BSSID value to seperate your original AP from others (if there is any)") 
-	
+	print("\n[!] At this point, you have to provide an SSID (preferably, your own SSID) to check whether there is a suspicious (rogue) AP is present.")
+	print("[!] Optionally, you may enter your BSSID value to separate your original AP from others (if there is any)") 
+    
 	ssid = input("\nEnter target SSID: ")
-	
+    
 	# Check whether given input is a valid BSSID
 	bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
-	
+    
 	print("\n[!] Do you want to enter BSSID to exclude your own AP? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
 	answer = input().lower()
-	
+    
 	while answer not in ['y', 'n']:
-    		answer = input("\nInvalid input. Please enter 'y' or 'n': ").lower()
-	
+		answer = input("\nInvalid input. Please enter 'y' or 'n': ").lower()
+    
 	if answer == 'y':
 		while True:
 			bssid = input("\nEnter BSSID of original AP: ")
-			
+            
 			if len(bssid) == 17 and bssidPattern.match(bssid):
 				break
 
 			else:
 				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
-    	
-	timeout = int(input("\nEnter a value to set a timeout value for reading Beacons (in seconds): ")) # read packets for X seconds --this will be improved to "stop reading if there are no new beacons for X seconds"
-    	
-	print("\n[!] Reading Beacons, please wait.\n")
-    	
+        
+	duration = int(input("\nEnter the duration to listen for beacons (in seconds): "))
+	timeout = duration if duration > 0 else None
+    
+	print("\n[!] Listening for beacons, please wait...\n")
+        
 	try:
 		sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0, timeout=timeout)
-		
-		i = 1
-		
-		print(f"\n[!] Beacon reading is completed!")
-		print(f"\n[!] SSID \"{ssid}\" with all unique BSSIDs:\n")
-		
-		for bssid, bssid_uptime in uniqueBSSID:
+        
+		print("\n\033[92m[!] Beacon reading is completed!\033[0m")
+		print(f"\n\033[92m[!] SSID \"{ssid}\" with all unique BSSIDs:\n\033[0m")
+        
+		for i, (bssid, bssid_uptime) in enumerate(uniqueBSSID, 1):
 			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
-			i += 1
+        
+		# Find Rogue APs w/Uptime
 		
-		compareBSSIDUptime()
-		
+
 	except BeaconSignalReceived:
 		message = "\nFinding Rogue/Fake APs...\n"
-		
+        
 		for char in message:
 			print(char, end = "", flush = True)
 			time.sleep(0.05)
-		
+        
 		print()
 	    	
 def spotHiddenAP():
@@ -269,12 +284,12 @@ def safeExit():
 		
 		subprocess.call(['pkill', 'gnome-terminal'])
 		
-		print("DONE!")
+		print("\033[92mDONE!\033[0m")
 
 	# Restore card interfaces
 
 	for i in range(len(changedCards)):
-		message = "\nRestoring Wireless Interface " + str(i+1) +  " to \"Managed Mode\""
+		message = "\n[!] Restoring Wireless Interface " + str(i+1) +  " to \"Managed Mode\""
 		
 		for char in message:
 			print(char, end = "", flush = True)
@@ -285,24 +300,25 @@ def safeExit():
 		subprocess.call(['sudo', 'iwconfig', wirelessInterfaces[i], 'mode', 'managed'])	
 		subprocess.call(['sudo', 'ifconfig', changedCards[i], 'up'])
 		
-		print("\n[+] Wireless Interface " + str(i+1) + " restored to \"Managed Mode\"!")
+		print("\n\033[92m[+] Wireless Interface " + str(i+1) + " restored to \"Managed Mode\"!\033[0m")
 
 def main():
 	
 	print("""
 	
-	$$$$$$$\  $$\           $$\       $$\      $$\            $$\               $$\       
-	$$  __$$\ \__|          $$ |      $$ | $\  $$ |           $$ |              $$ |      
-	$$ |  $$ |$$\  $$$$$$\  $$$$$$$\  $$ |$$$\ $$ | $$$$$$\ $$$$$$\    $$$$$$$\ $$$$$$$\  
-	$$$$$$$\ |$$ |$$  __$$\ $$  __$$\ $$ $$ $$\$$ | \____$$\\_$$  _|  $$  _____|$$  __$$\ 
-	$$  __$$\ $$ |$$ |  \__|$$ |  $$ |$$$$  _$$$$ | $$$$$$$ | $$ |    $$ /      $$ |  $$ |
-	$$ |  $$ |$$ |$$ |      $$ |  $$ |$$$  / \$$$ |$$  __$$ | $$ |$$\ $$ |      $$ |  $$ |
-	$$$$$$$  |$$ |$$ |      $$$$$$$  |$$  /   \$$ |\$$$$$$$ | \$$$$  |\$$$$$$$\ $$ |  $$ |
-	\_______/ \__|\__|      \_______/ \__/     \__| \_______|  \____/  \_______|\__|  \__|
-        
-        ######################################################################################
+	  /$$$$$$  /$$                             /$$     /$$$$$$$                                                   
+	 /$$__  $$| $$                            | $$    | $$__  $$                                                  
+	| $$  \__/| $$$$$$$   /$$$$$$   /$$$$$$$ /$$$$$$  | $$  \ $$  /$$$$$$   /$$$$$$   /$$$$$$$  /$$$$$$  /$$$$$$$ 
+	| $$ /$$$$| $$__  $$ /$$__  $$ /$$_____/|_  $$_/  | $$$$$$$  /$$__  $$ |____  $$ /$$_____/ /$$__  $$| $$__  $$
+	| $$|_  $$| $$  \ $$| $$  \ $$|  $$$$$$   | $$    | $$__  $$| $$$$$$$$  /$$$$$$$| $$      | $$  \ $$| $$  \ $$
+	| $$  \ $$| $$  | $$| $$  | $$ \____  $$  | $$ /$$| $$  \ $$| $$_____/ /$$__  $$| $$      | $$  | $$| $$  | $$
+	|  $$$$$$/| $$  | $$|  $$$$$$/ /$$$$$$$/  |  $$$$/| $$$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$
+	\______/ |__/  |__/ \______/ |_______/    \___/  |_______/  \_______/ \_______/ \_______/ \______/ |__/  |__/
+                                                                                                              
+
+    	######################################################################################
                                        
-        	     802.11 Hidden AP & Fake AP Spotter - Developed by Anıl Çelik
+        	  802.11 Hidden AP & Fake AP Spotter - Developed by Anıl Çelik (@ccelikanil)
         	      
 	######################################################################################                                           
 	""")
