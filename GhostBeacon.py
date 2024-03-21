@@ -109,76 +109,88 @@ class BeaconSignalReceived(Exception):
     pass
 
 def checkBeacon(packet):
-	global ssidFound
-	global uniqueBSSID
-	global ssidCapabilities
-    
-	def signalHandler(sig, frame):
-		i = 1 
+    global ssidFound
+    global uniqueBSSID
+    global ssidCapabilities
+    global ouiBytes
+    global pwr
+    global minPWR
 
-		for bssid, bssid_uptime in uniqueBSSID:
-			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
-			i += 1
+    def signalHandler(sig, frame):
+        i = 1
 
-		raise BeaconSignalReceived("Beacon signal received!")
+        for bssid, uptimeStr, enc, pwr in uniqueBSSID:
+            print(
+                f"{i} - BSSID: \"{bssid}\", Uptime: {uptimeStr}, Encryption: {enc}, PWR: {pwr}")
+            i += 1
 
-	signal.signal(signal.SIGINT, signalHandler)
-    
-	if packet.haslayer(Dot11Beacon):
-		if packet.info.decode('utf-8') == ssid and not ssidFound:
-			ssidFound = True
-			ssidCapabilities[ssid] = packet[Dot11Beacon].cap    # store unique SSID's to ssidCapabilities list    
+        raise BeaconSignalReceived("Beacon signal received!")
 
-			bssid = packet[Dot11].addr3.upper()
-                
+    signal.signal(signal.SIGINT, signalHandler)
+
+    if packet.haslayer(Dot11Beacon):
+        if packet.info.decode('utf-8') == ssid and not ssidFound:
+            ssidFound = True
+            ssidCapabilities[ssid] = packet[Dot11Beacon].cap  # store unique SSID's to ssidCapabilities list
+
+            bssid = packet[Dot11].addr3.upper()
+
             # Calculate & Sort Uptime ---
-                
-			timestamp = packet[Dot11].timestamp
-			epoch = datetime.utcfromtimestamp(0)
-			beaconTime = epoch + timedelta(microseconds=timestamp)    # actual uptime + epoch
-			uptime = beaconTime - epoch
-			uptimeStr = str(uptime).split('.')[0]
 
-			if len(uniqueBSSID) > 1:									
-				minUptimeBSSID, minUptime = min(uniqueBSSID, key=lambda x: x[1])	# sort uptimes
-                
-				print("\n[!] Comparing BSSID uptimes:\n")
-            
-				for bssid, uptime in uniqueBSSID:
-					if bssid == minUptimeBSSID:
-						print(f"\033[91m[!] BSSID: {bssid}, Uptime: {uptime} (AP w/Minimum Uptime!)\033[0m")
-			else:
-				print("\n\033[92m[!] Only one BSSID found!\033[0m")
-                        
+            timestamp = packet[Dot11].timestamp
+            epoch = datetime.utcfromtimestamp(0)
+            beaconTime = epoch + timedelta(
+                microseconds=timestamp)  # actual uptime + epoch
+            uptime = beaconTime - epoch
+            uptimeStr = str(uptime).split('.')[0]
+
             # Get encryption capabilities
-            
-			if "privacy" not in (ssidCapabilities[ssid].flagrepr()): # check if beacon's privacy bit is 0
-				print("\033[91m[!] AP has no encryption (OPN)!\033[0m")
-			
-			else:
-				print("\033[90m[!] AP has encryption (WEP/WPA/2/3)\033[0m")
+
+            if "privacy" not in (ssidCapabilities[ssid].flagrepr()):  # check if beacon's privacy bit is 0
+                enc = "OPN"
+            else:
+                enc = "WEP/WPA/2/3"
 
             # Check OUI
 
-			############################
-			
-			# Get TX
+            ouiBytes = []
+            extractedBSSID = packet[Dot11].addr3.upper()[:8]
+            ouiBytes.append(extractedBSSID)
 
-			############################
-            
-			if bssid not in [x[0] for x in uniqueBSSID]:
-				print(f"\n\033[92m[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}\033[0m")
+            # Get TX
 
-				if bssid not in [x[0] for x in uniqueBSSID]:
-					print(f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
-					uniqueBSSID.append((bssid, uptimeStr))
-                    
-					ssidFound = False
-                
-				uptimeStr = ''    # reset uptime value for each bssid
+            if packet.haslayer(RadioTap):
+                pwr = packet[RadioTap].dBm_AntSignal
+            else:
+                print("\033[91m[!] Unable to obtain PWR value!\033[0m")
 
-			elif bssid in [x[0] for x in uniqueBSSID]:
-				ssidFound = False
+            # calculate min tx
+            if not uniqueBSSID:  # Check if uniqueBSSID list is empty
+                minPWR = pwr
+            else:
+                minPWR = min(uniqueBSSID, key=lambda x: abs(x[3]))[3]
+
+            if abs(pwr) < abs(minPWR):
+                minPWR = pwr
+
+            ############################
+
+            if bssid not in [x[0] for x in uniqueBSSID]:
+                print(
+                    f"\n\033[92m[+] Found SSID \"{ssid}\" w/BSSID value \"{bssid}\". AP's uptime: {uptimeStr}\033[0m")
+
+                if bssid not in [x[0] for x in uniqueBSSID]:
+                    print(
+                        f"\n[!] {bssid} added to the comparison list. Searching for next beacon, please wait...")
+                    uniqueBSSID.append((bssid, uptimeStr, enc, pwr))
+
+                    ssidFound = False
+
+                uptimeStr = ''  # reset uptime value for each bssid
+
+            elif bssid in [x[0] for x in uniqueBSSID]:
+                ssidFound = False
+
 
 def spotFakeAP():
 	global savedFile
@@ -216,6 +228,9 @@ def spotFakeAP():
 	# Check whether given input is a valid BSSID
 	bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
     
+
+	####### Will add this feature
+	"""
 	print("\n[!] Do you want to enter BSSID to exclude your own AP? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
 	answer = input().lower()
     
@@ -231,7 +246,9 @@ def spotFakeAP():
 
 			else:
 				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
-        
+    """
+	#######
+
 	duration = int(input("\nEnter the duration to listen for beacons (in seconds): "))
 	timeout = duration if duration > 0 else None
     
@@ -240,12 +257,34 @@ def spotFakeAP():
 	try:
 		sniff(iface=wirelessInterfaces[0], prn=checkBeacon, store=0, timeout=timeout)
         
-		print("\n\033[92m[!] Beacon reading is completed!\033[0m")
+		print("\n\033[92m[!] Beacon reading is DONE!\033[0m")
 		print(f"\n\033[92m[!] SSID \"{ssid}\" with all unique BSSIDs:\n\033[0m")
+		print("\033[90m[!] Check BSSIDs to see whether they are in your asset list!\033[0m\n") 
         
-		for i, (bssid, bssid_uptime) in enumerate(uniqueBSSID, 1):
-			print(f"{i} - BSSID: \"{bssid}\", Uptime: {bssid_uptime}")
+		if len(uniqueBSSID) > 1:									
+			minUptimeBSSID, minUptime, enc, pwr = min(uniqueBSSID, key=lambda x: x[1])	# sort uptimes
+                
+			print("\n[!] Comparing BSSID uptimes:\n")
+            
+			for bssid, uptime, enc, pwr in uniqueBSSID:
+				if bssid == minUptimeBSSID:
+					if enc == "OPN":
+						if minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' IS 99% A ROGUE (FAKE) AP!\033[0m\n")
+						elif not minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' has no encryption (OPN) and has the least AP uptime. High chances to be a ROGUE (FAKE) AP.\033[0m\n")
+					elif enc == "WEP/WPA/2/3":
+						print(f"\033[91m[!] BSSID: '{bssid}' has encryption (privacy bit set) but it has the least AP uptime. Consider checking it.\033[0m\n")
+		
+		elif len(uniqueBSSID) == 1:
+			print("\n\033[92m[!] Only one BSSID found!\033[0m")
+		else:
+			print("\n\033[91m[!] No beacon!!\033[0m")
+
+		for i, (bssid, uptimeStr, enc, pwr) in enumerate(uniqueBSSID, 1):
+			print(f"{i} - BSSID: \"{bssid}\", Uptime: {uptimeStr}, Encryption: {enc}, PWR: {pwr}")
         
+		#print(minPWR)
 		# Find Rogue APs w/Uptime
 		
 
