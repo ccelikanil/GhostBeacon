@@ -264,18 +264,41 @@ def spotFakeAP():
 		if len(uniqueBSSID) > 1:									
 			minUptimeBSSID, minUptime, enc, pwr = min(uniqueBSSID, key=lambda x: x[1])	# sort uptimes
                 
-			print("\n[!] Comparing BSSID uptimes:\n")
+			print("\n[!] Comparing BSSIDs:\n")
             
 			for bssid, uptime, enc, pwr in uniqueBSSID:
-				if bssid == minUptimeBSSID:
-					if enc == "OPN":
+				if enc == "OPN":
+					if bssid == minUptimeBSSID:
 						if minPWR:
 							print(f"\033[91m[!] BSSID: '{bssid}' IS 99% A ROGUE (FAKE) AP!\033[0m\n")
 						elif not minPWR:
-							print(f"\033[91m[!] BSSID: '{bssid}' has no encryption (OPN) and has the least AP uptime. High chances to be a ROGUE (FAKE) AP.\033[0m\n")
+							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN and has MINIMUM UPTIME. High chances to be a ROGUE (FAKE) AP!\033[0m\n")
+					elif bssid != minUptimeBSSID:
+						if minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN and has the CLOSEST SIGNAL. High chances to be a ROGUE (FAKE) AP!\033[0m\n")
+						elif not minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN. Might be a ROGUE (FAKE) AP. Consider checking your asset it.\033[0m\n")
+				elif enc != "OPN":
+					if bssid == minUptimeBSSID:
+						if minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' AP has encryption (privacy bit set) but it has MINIMUM UPTIME and has the CLOSEST SIGNAL. High chances to be a ROGUE (FAKE) AP!\033[0m\n")
+						elif not minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' AP has encryption (privacy bit set) but it has MINIMUM UPTIME. Consider checking your asset list.\033[0m\n")
+					elif bssid != minUptimeBSSID:
+						if minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' AP has encryption (privacy bit set) but it has the CLOSEST SIGNAL. Consider checking your asset list.\033[0m\n")
+						elif not minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' High chances to be a false-positive.\033[0m\n")
+				"""
+				if bssid == minUptimeBSSID:
+					if enc == "OPN":
+						if minPWR:
+							p
+						elif not minPWR:
+							print(f"\033[91m[!] BSSID: '{bssid}' has no encryption (OPN) and has the least AP uptime. We are not sure about it's signal power but there are high chances to be a ROGUE (FAKE) AP.\033[0m\n")
 					elif enc == "WEP/WPA/2/3":
-						print(f"\033[91m[!] BSSID: '{bssid}' has encryption (privacy bit set) but it has the least AP uptime. Consider checking it.\033[0m\n")
-		
+						print(f"\033[91m[!] BSSID: '{bssid}' has encryption (privacy bit set) but it has the least AP uptime. Consider checking your asset list.\033[0m\n")
+				"""
 		elif len(uniqueBSSID) == 1:
 			print("\n\033[92m[!] Only one BSSID found!\033[0m")
 		else:
