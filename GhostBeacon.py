@@ -139,7 +139,7 @@ def checkBeacon(packet):
 
 			bssid = packet[Dot11].addr3.upper()
 
-			# Calculate & Sort Uptime ---
+			# Calculate & Sort Uptime
 
 			timestamp = packet[Dot11].timestamp
 			epoch = datetime.utcfromtimestamp(0)
@@ -147,7 +147,7 @@ def checkBeacon(packet):
 			uptime = beaconTime - epoch
 			uptimeStr = str(uptime).split('.')[0]
 
-			# Adjust days, hours, minutes, seconds
+			# Adjust <DD, HH:MM:SS>
 
 			def adjustUptime(uptimeStr): 
 				parts = uptimeStr.split(', ')
@@ -169,7 +169,6 @@ def checkBeacon(packet):
 
 			adjustedUptime = adjustUptime(uptimeStr)
 
-			#print("uptime :", adjustedUptime)
             # Get encryption capabilities
 
 			if "privacy" not in (ssidCapabilities[ssid].flagrepr()):  # check if beacon's privacy bit is 0
@@ -177,12 +176,12 @@ def checkBeacon(packet):
 			else:
 				enc = "Privacy bit is present (1)"
 
-			# Check OUI
-
+			# Check OUI - will add this feature
+			"""
 			ouiBytes = []
 			extractedBSSID = packet[Dot11].addr3.upper()[:8]
 			ouiBytes.append(extractedBSSID)
-
+			"""
             # Get TX
 
 			if packet.haslayer(RadioTap):
@@ -261,7 +260,7 @@ def spotFakeAP():
 	ssid = input("\nEnter target SSID: ")
     
 	# Check whether given input is a valid BSSID
-	bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
+	# bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
     
 
 	####### Will add this feature
@@ -357,19 +356,75 @@ def spotFakeAP():
 			time.sleep(0.05)
         
 		print()
-	    	
+
+def checkHiddenBeacon(packet):
+	global hiddenSSIDFlag
+	global hiddenBSSID
+	global uniqueBSSID
+	
+	if packet.haslayer(Dot11Beacon):
+		ssid = packet.info.decode('utf-8')
+		bssid = packet.addr3.upper()
+
+		# Calculate Channel Number
+		
+		channelRAW = packet[Dot11Elt:3]
+		channel = int.from_bytes(channelRAW.info, byteorder='little')
+
+		# Count null chars (\000)
+
+		nullChars = ssid.count("\000")
+
+		# If beacon is "clear" or beacon has "null chars (\000)" 
+		
+		if ssid == "" or "\000" in ssid:
+			if (bssid, channel, nullChars) not in uniqueBSSID:
+				if "\000" in ssid:
+					nullChars = ssid.count("\000")
+					uniqueBSSID.append((bssid, channel, nullChars))
+				elif ssid == "":
+					nullChars = 0
+					uniqueBSSID.append((bssid, channel, nullChars))
+				
+				hiddenSSIDFlag = True
+				hiddenBSSID = bssid
+
+				print(f"\n\033[92m[+] Hidden SSID detected! BSSID value: \"{bssid}\", Channel: {channel}, SSID length: {nullChars}\033[0m\n")
+				print("\033[90m[!] Trying to obtain AP's SSID value...\033[0m\n") 
+				#print("hidden ssid detected! bssid: ", bssid, "channel: ", channel, "SSID length: ", nullChars)
+
 def spotHiddenAP():
-	print("""
+	global hiddenSSIDFlag
+	global hiddenBSSID
+
+	hiddenSSIDFlag = False
+	hiddenBSSID = ""
+
+	print("Hidden AP Spotter Module is selected. \"airodump-ng\" window is spawning...\n")
+	print("[!] Listening for beacons, please wait...\n")
+
+	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write beacons/{savedFile}"
+	airodumpProcess = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
+	processID = airodumpProcess.pid
+	processes.append(processID)
+	time.sleep(5)
+
+	try:
+		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=30)
+
+		print("[!] Whole BSSID list w/Hidden SSID value(s):\n")
+		
+		i = 1
+
+		for i, (bssid, channel, nullChars) in enumerate(uniqueBSSID, 1):
+			print(f"{i} - BSSID: {bssid}, Channel: {channel}, SSID length: {nullChars}")
+
+	except KeyboardInterrupt:
+		print("Interrupted!")
+
 	
-	######################################################
-		      
-		     Hidden Access Point Spotter
-		      
-	######################################################
-	
-	""")	
-	
-	
+
+
 def safeExit():
 	# Kill spawned processes
 	
@@ -428,7 +483,7 @@ def main():
 	checkRequirements()
 	listInterfaces()
 	changeOperatingMode()
-	spotFakeAP()
+	spotHiddenAP()
 	
 	safeExit()
 	
