@@ -87,11 +87,14 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 - Since Fake APs are deployed later than the original AP, their uptime values are usually shorter than the original AP. Even though uptime value is easy to fake, it's still pretty easy to discriminate this value.
 - Due to 802.11's protocol implementation, clients are tend to connect to the nearest AP among the ones having same SSID value. Which brings us to our next control: **PWR (TX)** check *(i.e. Signal Strength)*. If an attacker wants a victim to connect to their Rogue AP, they first need to disconnect the victim from original AP and force them to send a connection request *(i.e. Probe Request)* to their Rogue AP by setting up an AP with stronger signal.
 - Fake APs may have encryption *(they may have their Privacy Bit set)*. If target BSSID has an encryption, same controls needs to be done as we did on OPN BSSIDs.     
+<p align="center"> <img src="rsc/readme-screenshots/5_fakeap_spotopn_minuptime.PNG" /> </p>
+<p align="center"> Figure #6 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
+<p align="center"> <img src="rsc/readme-screenshots/6_fakeap_enc_minuptime_minpwr.PNG" /> </p>
+<p align="center"> Figure #7 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
-
-
-
+<p align="center"> <img src="rsc/readme-screenshots/7_fakeap_enc_minpwr_minuptime.PNG" /> </p>
+<p align="center"> Figure #8 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
 ## What's next?
 
