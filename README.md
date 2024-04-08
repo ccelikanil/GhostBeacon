@@ -42,13 +42,29 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 - Then, users are asked to enter an SSID value to check if there's any rogue (fake) access point with same SSID is present.
 - Also, users are asked to enter a value for packet sniffing duration.
-- When these inputs are provided, the program starts to sniff **"Beacon Frames"** in the area and saves all access points with unique BSSID (MAC address) values into a list.
+- When these inputs are provided, the program starts to sniff **"Beacon Frames"** in the area and saves all access points with unique BSSID (MAC address) values into a list *- namely, the "Comparison List*".
 
 <p align="center"> <img src="rsc/readme-screenshots/4_fakeap_spotopn_privacy.PNG" /> </p>
 <p align="center"> Figure #5 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
 **Explanation of **"Figure #5"** is as follows:
-- 
+- User first inputs an SSID value, **"RFC6797"**, followed by the duration value, **"30"**.
+- Program finds **4** unique access points with given SSID and saves them into the comparison list.
+- After completing Beacon listening, program does it's calculation depending on following code:
+
+  ```
+  Pseudo-code of lines 271..294 in GhostBeacon.py
+  ...
+    iterate through uniqueBSSID list:
+      if bssid.encryption == none:
+          if bssid.uptime == minUptime:
+              if bssid.pwr == minPWR:
+                  print("AP IS 99% A ROGUE (FAKE) AP!")
+              else if bssid.pwr != minPWR:
+                  print("AP is OPN and has MINIMUM UPTIME. High chances to be a ROGUE (FAKE) AP!")
+          else if 
+  ...
+  ```
 
 
 
