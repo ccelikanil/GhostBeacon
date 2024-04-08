@@ -122,7 +122,7 @@ try:
 
 - In above snippet, since **"Probe Response"** sniffing is done after Beacon sniffing, the same timeout value needs to be applied in here and that's why we have to wait for ``timeout*2`` seconds.
 - Program first discovers **"Beacon Frames"** and checks whether the SSID value is hidden in that specific Beacon Frame packet.
-- Determining whether the SSID is hidden or not is pretty simple and can be done in two ways: **First way is:** if **"Clear Beacons"** are being sent, that is, if the SSID length is zero, this means that the SSID is hidden. **Second way is:** If SSID has **"Null Bytes (\000)"** inside it's value, this means that that SSID is also hidden. Luckily, we can guess the SSID length by counting null bytes inside the SSID info.    
+- Determining whether the SSID is hidden or not is pretty simple and can be done in two ways: **First way is:** if **"Clear Beacons"** are being sent, that is, if the SSID length is zero, this means that the SSID is hidden. **Second way is:** If SSID has **"Null Bytes (``\000``)"** inside it's value, this means that that SSID is also hidden. Luckily, we can guess the SSID length by counting null bytes inside the SSID info.    
 
 ## What's next?
 
