@@ -54,16 +54,31 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
   ```
   Pseudo-code of lines 271..294 in GhostBeacon.py
-  ...
-    iterate through uniqueBSSID list:
-      if bssid.encryption == none:
-          if bssid.uptime == minUptime:
-              if bssid.pwr == minPWR:
-                  print("AP IS 99% A ROGUE (FAKE) AP!")
-              else if bssid.pwr != minPWR:
-                  print("AP is OPN and has MINIMUM UPTIME. High chances to be a ROGUE (FAKE) AP!")
-          else if 
-  ...
+  
+    iterate (for) through uniqueBSSID list:
+        if bssid.encryption is None:
+            if bssid.uptime is minUptime:
+                if bssid.pwr is minPWR:
+                    print("AP IS 99% A ROGUE (FAKE) AP!")
+                else if bssid.pwr not minPWR:
+                    print("AP is OPN and has MINIMUM UPTIME. High chances to be a ROGUE (FAKE) AP!")
+            else if bssid.uptime not minUptime:
+                if bssid.pwr is minPWR:
+                    print("AP is OPN and has the CLOSEST SIGNAL. High chances to be a ROGUE (FAKE) AP!")
+                else if bssid.pwr not minPWR:
+                    print("AP is OPN. Might be a ROGUE (FAKE) AP. Consider checking your asset list.
+
+      else if bssid.encryption not None:
+          if bssid.uptime is minUptime:
+                if bssid.pwr is minPWR:
+                    print("AP has encryption (privacy bit set) but it has MINIMUM UPTIME and has the CLOSEST SIGNAL. High chances to be a ROGUE (FAKE) AP!")
+                else if bssid.pwr not minPWR:
+                    print("AP has encryption (privacy bit set) but it has MINIMUM UPTIME. Consider checking your asset list.")
+          else if bssid.uptime not minUptime:
+                if bssid.pwr is minPWR:
+                    print("AP has encryption (privacy bit set) but it has the CLOSEST SIGNAL. Consider checking your asset list.")
+                else if bssid.pwr not minPWR:
+                    print("High chances to be a false-positive.")
   ```
 
 
