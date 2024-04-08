@@ -362,36 +362,52 @@ def checkHiddenBeacon(packet):
 	global hiddenBSSID
 	global uniqueBSSID
 	
+	hiddenChannel = None
+
 	if packet.haslayer(Dot11Beacon):
 		ssid = packet.info.decode('utf-8')
 		bssid = packet.addr3.upper()
-
-		# Calculate Channel Number
 		
-		channelRAW = packet[Dot11Elt:3]
-		channel = int.from_bytes(channelRAW.info, byteorder='little')
+		hiddenChannel = int.from_bytes(packet[Dot11Elt:3].info, byteorder='little')		# Calculate channel number
 
-		# Count null chars (\000)
-
-		nullChars = ssid.count("\000")
+		nullChars = ssid.count("\000")	# Count null chars (\000)
 
 		# If beacon is "clear" or beacon has "null chars (\000)" 
 		
 		if ssid == "" or "\000" in ssid:
-			if (bssid, channel, nullChars) not in uniqueBSSID:
+			if (bssid, hiddenChannel, nullChars) not in uniqueBSSID:
 				if "\000" in ssid:
 					nullChars = ssid.count("\000")
-					uniqueBSSID.append((bssid, channel, nullChars))
+					uniqueBSSID.append((bssid, hiddenChannel, nullChars))
 				elif ssid == "":
 					nullChars = 0
-					uniqueBSSID.append((bssid, channel, nullChars))
+					uniqueBSSID.append((bssid, hiddenChannel, nullChars))
 				
 				hiddenSSIDFlag = True
 				hiddenBSSID = bssid
 
-				print(f"\n\033[92m[+] Hidden SSID detected! BSSID value: \"{bssid}\", Channel: {channel}, SSID length: {nullChars}\033[0m\n")
+				print(f"\n\033[92m[+] Hidden SSID detected! BSSID value: \"{bssid}\", Channel: {hiddenChannel}, SSID length: {nullChars}\033[0m\n")
 				print("\033[90m[!] Trying to obtain AP's SSID value...\033[0m\n") 
-				#print("hidden ssid detected! bssid: ", bssid, "channel: ", channel, "SSID length: ", nullChars)
+
+	#elif not packet.haslayer(Dot11Beacon):
+
+
+def checkProbeResponse(packet):
+	global hiddenSSIDFlag
+	global hiddenBSSID
+	global uniqueBSSID
+
+	if packet.haslayer(Dot11) and packet.type == 0 and packet.subtype == 0x0005:
+		bssid = packet.addr3.upper()
+		channel = int.from_bytes(packet[Dot11Elt:3].info, byteorder='little')
+		ssid = packet.info.decode('utf-8')
+
+		print(f"\033[90m[!] Caught Probe Response for {bssid} but seems like it doesn't belong to an hidden AP. Possible SSID: {ssid}\033[0m")
+
+		for hiddenBSSID, hiddenChannel, nullChars in uniqueBSSID:
+			if bssid == hiddenBSSID and channel == hiddenChannel:
+				ssid = packet.info.decode('utf-8')
+				print(f"\033[92m[+] Caught Probe Response packet for hidden SSID! SSID: {ssid}, BSSID: {bssid}, Channel: {channel}\033[0m")
 
 def spotHiddenAP():
 	global hiddenSSIDFlag
@@ -411,14 +427,17 @@ def spotHiddenAP():
 
 	try:
 		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=30)
+		#subprocess.call(['pkill', 'gnome-terminal'])
+		print("[!] Hunting for probes...\n")
+		sniff(iface=wirelessInterfaces[0], prn=checkProbeResponse, store=0, timeout=60)
 
 		print("[!] Whole BSSID list w/Hidden SSID value(s):\n")
 		
 		i = 1
 
-		for i, (bssid, channel, nullChars) in enumerate(uniqueBSSID, 1):
-			print(f"{i} - BSSID: {bssid}, Channel: {channel}, SSID length: {nullChars}")
-
+		for i, (bssid, hiddenChannel, nullChars) in enumerate(uniqueBSSID, 1):
+			print(f"{i} - BSSID: {bssid}, Channel: {hiddenChannel}, SSID length: {nullChars}")
+		
 	except KeyboardInterrupt:
 		print("Interrupted!")
 
@@ -468,7 +487,7 @@ def main():
 	| $$|_  $$| $$  \ $$| $$  \ $$|  $$$$$$   | $$    | $$__  $$| $$$$$$$$  /$$$$$$$| $$      | $$  \ $$| $$  \ $$
 	| $$  \ $$| $$  | $$| $$  | $$ \____  $$  | $$ /$$| $$  \ $$| $$_____/ /$$__  $$| $$      | $$  | $$| $$  | $$
 	|  $$$$$$/| $$  | $$|  $$$$$$/ /$$$$$$$/  |  $$$$/| $$$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$
-	\______/ |__/  |__/ \______/ |_______/    \___/  |_______/  \_______/ \_______/ \_______/ \______/ |__/  |__/
+	 \______/ |__/  |__/ \______/ |_______/    \___/  |_______/  \_______/ \_______/ \_______/ \______/ |__/  |__/
                                                                                                               
 
     	######################################################################################
@@ -483,7 +502,7 @@ def main():
 	checkRequirements()
 	listInterfaces()
 	changeOperatingMode()
-	spotHiddenAP()
+	spotFakeAP()
 	
 	safeExit()
 	
