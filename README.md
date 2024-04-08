@@ -47,7 +47,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/4_fakeap_spotopn_privacy.PNG" /> </p>
 <p align="center"> Figure #5 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
-**Explanation of **"Figure #5"** is as follows:
+**Explanation of **"Figure #5"** is as follows:**
 - User first inputs an SSID value, **"RFC6797"**, followed by the duration value, **"30"**.
 - Program finds **4** unique access points with given SSID and saves them into the comparison list.
 - After completing Beacon listening, program does it's calculation depending on following code:
