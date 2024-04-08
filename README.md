@@ -109,6 +109,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 - See below:
 
 ```
+Lines 388..391 in GhostBeacon.py
 ...
 
 try:
