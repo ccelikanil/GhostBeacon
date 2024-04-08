@@ -1,4 +1,4 @@
-# GhostBeacon
+# GhostBeacon v1.0
 
 <p align="center"> <img src="rsc/banner.png" /> </p>                                                                                                                
 
