@@ -11,11 +11,11 @@
 
 ## How it works?
 
-Follow-up the **"Proof-of-Concept (PoC)**" Section.
+You can visit my **Medium post** for a long explanation.
 
 TL;DR - Basically, provided features are depending on how 802.11 protocol works. 
 
-## Proof-of-Concepts (PoCs) & How It Works
+## Some PoCs
 
 ### Main Menu
 
@@ -30,7 +30,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 - Then, program checks whether there's a wireless card plugged in and then it checks if corresponding wireless card is in **"Monitor Mode"**. Since we are going to sniff the air for capturing packets, the card needs to be in **"Monitor Mode"**. 
 - After necessary checks completed, users can choose ``1`` for  **"Rogue (Fake) AP Spotter"** module or ``2`` for **Hidden AP Spotter"** module.
 
-### Rogue (Fake) AP Module
+### Module #1: Rogue (Fake) Access Spotter
 
 <p align="center"> <img src="rsc/readme-screenshots/2_fakeap_selectmodule.PNG" /> </p>
 <p align="center"> Figure #3 - Rogue (Fake) AP Spotter Module </p>
@@ -95,6 +95,10 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 <p align="center"> <img src="rsc/readme-screenshots/7_fakeap_enc_minpwr_minuptime.png" /> </p>
 <p align="center"> Figure #8 - Sample Run: Spotting Rogue (Fake) Access Points </p>
+
+### Module #2: Hidden Access Point Spotter 
+
+
 
 ## What's next?
 
