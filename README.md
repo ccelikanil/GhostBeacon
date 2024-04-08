@@ -133,6 +133,5 @@ try:
 ## What's next?
 
 ...
- <div style="text-align:center;"> 
-	 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/anilcelik) 
- </div>
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/anilcelik) 
