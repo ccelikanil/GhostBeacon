@@ -98,6 +98,8 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 ### Module #2: Hidden Access Point Spotter 
 
+<p align="center"> <img src="rsc/readme-screenshots/8_hiddenap_selectmodule.PNG" /> </p>
+<p align="center"> Figure #9 - Hidden AP Spotter Module </p>
 
 
 ## What's next?
