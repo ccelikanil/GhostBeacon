@@ -80,7 +80,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
                 else if bssid.pwr not minPWR:
                     print("High chances to be a false-positive.")
   ```
-
+<p align="center"> Code Snippet #1 - Pseudo-code of Rogue (Fake) AP Detection Mechanism </p>
 
 
 
