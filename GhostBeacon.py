@@ -279,7 +279,7 @@ def spotFakeAP():
 						if pwr == minPWR:
 							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN and has the CLOSEST SIGNAL. High chances to be a ROGUE (FAKE) AP!\033[0m\n")
 						elif pwr != minPWR:
-							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN. Might be a ROGUE (FAKE) AP. Consider checking your asset it.\033[0m\n")
+							print(f"\033[91m[!] BSSID: '{bssid}' AP is OPN. Might be a ROGUE (FAKE) AP. Consider checking your asset list.\033[0m\n")
 				
 				elif enc != "OPN":
 					if adjustedUptime == minUptimeBSSID[1]:
@@ -342,7 +342,7 @@ def checkHiddenBeacon(packet):
 				hiddenBSSID = bssid
 
 				print(f"\n\033[92m[+] Hidden SSID detected! BSSID value: \"{bssid}\", Channel: {hiddenChannel}, SSID length: {nullChars}\033[0m\n")
-				print("\033[90m[!] Trying to obtain AP's SSID value...\033[0m\n") 
+				print("\033[90m[!] Trying to obtain AP's SSID value...\033[0m\n")
 
 def checkProbeResponse(packet):
 	global hiddenSSIDFlag
@@ -360,6 +360,8 @@ def checkProbeResponse(packet):
 			if bssid == hiddenBSSID and channel == hiddenChannel:
 				ssid = packet.info.decode('utf-8')
 				print(f"\033[92m[+] Caught Probe Response packet for hidden SSID! SSID: {ssid}, BSSID: {bssid}, Channel: {channel}\033[0m")
+			#else:
+				
 
 def spotHiddenAP():
 	global hiddenSSIDFlag
@@ -369,7 +371,13 @@ def spotHiddenAP():
 	hiddenBSSID = ""
 
 	print("\n\033[92m[!] Hidden AP Spotter Module is selected. \"airodump-ng\" window is spawning...\033[0m\n")
-	print("[!] Listening for beacons, please wait...\n")
+	
+	duration = int(input("\nEnter the duration to listen for beacons (in seconds): "))
+	timeout = duration if duration > 0 else None
+	
+	print(f"\n\033[90m[!] Since Beacon reading and Probe Response reading done in separate functions, we have to wait for {timeout*2} seconds.\033[0m")
+	print("\n[!] Listening for beacons, please wait...\n")
+	
 
 	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write beacons/{savedFile}"
 	airodumpProcess = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
@@ -378,16 +386,19 @@ def spotHiddenAP():
 	time.sleep(5)
 
 	try:
-		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=30)
+		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=timeout)
 		print("[!] Hunting for probes...\n")
-		sniff(iface=wirelessInterfaces[0], prn=checkProbeResponse, store=0, timeout=60)
+		sniff(iface=wirelessInterfaces[0], prn=checkProbeResponse, store=0, timeout=timeout)
 
-		print("[!] Whole BSSID list w/Hidden SSID value(s):\n")
+		print("\n[!] Whole BSSID list w/Hidden SSID value(s):\n")
 		
-		i = 1
-
-		for i, (bssid, hiddenChannel, nullChars) in enumerate(uniqueBSSID, 1):
-			print(f"{i} - BSSID: {bssid}, Channel: {hiddenChannel}, SSID length: {nullChars}")
+		if len(uniqueBSSID) == 0:
+			print("\n\033[91m[!] No hidden SSID is present!\033[0m") 
+		else:
+			i = 1
+		
+			for i, (bssid, hiddenChannel, nullChars) in enumerate(uniqueBSSID, 1):
+				print(f"{i} - BSSID: {bssid}, Channel: {hiddenChannel}, SSID length: {nullChars}")
 		
 	except KeyboardInterrupt:
 		print("Interrupted!")
@@ -458,15 +469,18 @@ def main():
 
 		if choice == "1":
 			spotFakeAP()
+			safeExit()
+			break
 		elif choice == "2":
 			spotHiddenAP()
-		elif choice == "0":
+			safeExit()
+			break
+		elif choice == "0":	
 			print("\n\033[91m[!] Exiting...\033[0m")
+			safeExit()
 			break
 		else:
 			print("\n\033[91m[!] Invalid choice! Please select a valid option.\033[0m")
-	
-	safeExit()
 	
 if __name__ == '__main__':
 	main()
