@@ -17,9 +17,10 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 ## Some PoCs
 
-### Main Menu:
+### Main Menu
 
 <p align="center"> <img src="rsc/readme-screenshots/0_mainmenu.PNG" /> </p>
+<p alighn="center"> Figure #1 - Main Menu </p> 
 
 - Program first checks if the dependencies are installed on target OS. If dependencies are not installed, program calls ``rsc/setup.sh`` setup file to install dependencies automatically:
 
