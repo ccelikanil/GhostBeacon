@@ -38,10 +38,10 @@ def checkRequirements():
 		print("\n######################################################\n")
 	
 	except (OSError, subprocess.CalledProcessError):
-		print("\nSome of the requirements are not currently installed. You can try to install requirements manually by using \"requirements.txt\" file.\n")
+		print("\nSome of the requirements are not currently installed. Installing dependencies...\n")
+		subprocess.run(['sudo', 'chmod', '+x', 'rsc/setup.sh']) # give execution permisson to setup file
+		subprocess.run(['sudo', 'bash', 'rsc/setup.sh'])	# install dependencies
 		print("######################################################\n")
-		print("!!! EXITING !!!")
-		exit(0)
 
 def listInterfaces():
 	global wirelessInterfaces
@@ -205,8 +205,6 @@ def checkBeacon(packet):
 					minPWR = current_minPWR
 					minpwrBSSID = current_minpwrBSSID
 
-			#print("BSSID with minimum power: ", minpwrBSSID)
-
             ############################
 
 			if bssid not in [x[0] for x in uniqueBSSID]:
@@ -219,8 +217,6 @@ def checkBeacon(packet):
 					ssidFound = False
 
 				uptimeStr = ''  # reset uptime value for each bssid
-				#adjustedUptime = '' # reset adjustedUptime value for each bssid
-
 			elif bssid in [x[0] for x in uniqueBSSID]:
 				ssidFound = False
 
@@ -239,7 +235,7 @@ def spotFakeAP():
 	ssidCapabilities = {}
 	uniqueBSSID = []
 
-	print("Fake AP Spotter Module is selected. \"airodump-ng\" window is spawning...")
+	print("\n\033[92m[!] Fake AP Spotter Module is selected. \"airodump-ng\" window is spawning...\033[0m")
 
 	# add card selection feature
 
@@ -249,40 +245,12 @@ def spotFakeAP():
 	airodumpProcess = subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', spawnMonitor])
 	processID = airodumpProcess.pid
 	processes.append(processID)
-	#stdout, stderr = airodumpProcess.communicate()
 	time.sleep(5)
     
-	#os.kill(processID, signal.SIGTERM)    # now it's unnecessary but let it stay until first release
-
 	print("\n[!] At this point, you have to provide an SSID (preferably, your own SSID) to check whether there is a suspicious (rogue) AP is present.")
-	print("[!] Optionally, you may enter your BSSID value to separate your original AP from others (if there is any)") 
+	#print("[!] Optionally, you may enter your BSSID value to separate your original AP from others (if there is any)") 
     
-	ssid = input("\nEnter target SSID: ")
-    
-	# Check whether given input is a valid BSSID
-	# bssidPattern = re.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
-    
-
-	####### Will add this feature
-	"""
-	print("\n[!] Do you want to enter BSSID to exclude your own AP? (Format -> AA:BB:CC:DD:EE:FF) - y/n")
-	answer = input().lower()
-    
-	while answer not in ['y', 'n']:
-		answer = input("\nInvalid input. Please enter 'y' or 'n': ").lower()
-    
-	if answer == 'y':
-		while True:
-			bssid = input("\nEnter BSSID of original AP: ")
-            
-			if len(bssid) == 17 and bssidPattern.match(bssid):
-				break
-
-			else:
-				print("\nInvalid BSSID format. Please enter in the format of AA:BB:CC:DD:EE:FF")
-    """
-	#######
-
+	ssid = input("\nEnter target SSID: ")  
 	duration = int(input("\nEnter the duration to listen for beacons (in seconds): "))
 	timeout = duration if duration > 0 else None
     
@@ -299,15 +267,8 @@ def spotFakeAP():
 			minUptimeBSSID = min(uniqueBSSID, key=lambda x: x[1])	# sort uptimes
 						                
 			print("\n[!] Comparing BSSIDs:\n")
-            
-			#print(minUptimeBSSID[1])
-			#print(minpwrBSSID)
-			#print("minpwr:", minPWR)
-			#print("minpwrbssid:", minpwrBSSID)
-
 
 			for bssid, adjustedUptime, enc, pwr in uniqueBSSID:
-				#print(pwr)
 				if enc == "OPN":
 					if adjustedUptime == minUptimeBSSID[1]:
 						if pwr == minPWR:
@@ -342,12 +303,6 @@ def spotFakeAP():
 		for i, (bssid, adjustedUptime, enc, pwr) in enumerate(uniqueBSSID, 1):
 			print(f"{i} - BSSID: \"{bssid}\", Uptime: {adjustedUptime}, Encryption: {enc}, PWR: {pwr}")
         
-		#print(min(uniqueBSSID, key=lambda x: x[1]))	# sort uptimes
-
-		#print(minPWR)
-		# Find Rogue APs w/Uptime
-		
-
 	except BeaconSignalReceived:
 		message = "\nFinding Rogue/Fake APs...\n"
         
@@ -389,9 +344,6 @@ def checkHiddenBeacon(packet):
 				print(f"\n\033[92m[+] Hidden SSID detected! BSSID value: \"{bssid}\", Channel: {hiddenChannel}, SSID length: {nullChars}\033[0m\n")
 				print("\033[90m[!] Trying to obtain AP's SSID value...\033[0m\n") 
 
-	#elif not packet.haslayer(Dot11Beacon):
-
-
 def checkProbeResponse(packet):
 	global hiddenSSIDFlag
 	global hiddenBSSID
@@ -416,7 +368,7 @@ def spotHiddenAP():
 	hiddenSSIDFlag = False
 	hiddenBSSID = ""
 
-	print("Hidden AP Spotter Module is selected. \"airodump-ng\" window is spawning...\n")
+	print("\n\033[92m[!] Hidden AP Spotter Module is selected. \"airodump-ng\" window is spawning...\033[0m\n")
 	print("[!] Listening for beacons, please wait...\n")
 
 	spawnMonitor = f"airodump-ng {wirelessInterfaces[0]} --band abg --output-format csv --uptime --write beacons/{savedFile}"
@@ -427,7 +379,6 @@ def spotHiddenAP():
 
 	try:
 		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=30)
-		#subprocess.call(['pkill', 'gnome-terminal'])
 		print("[!] Hunting for probes...\n")
 		sniff(iface=wirelessInterfaces[0], prn=checkProbeResponse, store=0, timeout=60)
 
@@ -440,9 +391,6 @@ def spotHiddenAP():
 		
 	except KeyboardInterrupt:
 		print("Interrupted!")
-
-	
-
 
 def safeExit():
 	# Kill spawned processes
@@ -492,17 +440,31 @@ def main():
 
     	######################################################################################
                                        
-        	  802.11 Hidden AP & Fake AP Spotter - Developed by Anıl Çelik (@ccelikanil)
+          802.11 Rogue (Fake) AP & Hidden AP Spotter - Developed by Anıl Çelik (@ccelikanil)
         	      
 	######################################################################################                                           
 	""")
 
-	print("[!] This tool may generate false-positive info. Always consider checking your asset list.\n")
+	print("\033[90m[!] This tool may generate false-positive info. Always consider checking your asset list.\033[0m\n")
 
 	checkRequirements()
 	listInterfaces()
 	changeOperatingMode()
-	spotFakeAP()
+	
+	while True:
+		print("\n\033[92m[!] Select '1' for 'Rogue (Fake) AP Spotter' , Select '2' for 'Hidden AP Spotter' or Select '0' to exit.\033[0m")
+
+		choice = input("\n[!] Select module: ")
+
+		if choice == "1":
+			spotFakeAP()
+		elif choice == "2":
+			spotHiddenAP()
+		elif choice == "0":
+			print("\n\033[91m[!] Exiting...\033[0m")
+			break
+		else:
+			print("\n\033[91m[!] Invalid choice! Please select a valid option.\033[0m")
 	
 	safeExit()
 	
