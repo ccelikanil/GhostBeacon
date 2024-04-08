@@ -90,10 +90,10 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/5_fakeap_spotopn_minuptime.PNG" /> </p>
 <p align="center"> Figure #6 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
-<p align="center"> <img src="rsc/readme-screenshots/6_fakeap_enc_minuptime_minpwr.PNG" /> </p>
+<p align="center"> <img src="rsc/readme-screenshots/6_fakeap_enc_minuptime_minpwr.png" /> </p>
 <p align="center"> Figure #7 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
-<p align="center"> <img src="rsc/readme-screenshots/7_fakeap_enc_minpwr_minuptime.PNG" /> </p>
+<p align="center"> <img src="rsc/readme-screenshots/7_fakeap_enc_minpwr_minuptime.png" /> </p>
 <p align="center"> Figure #8 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
 ## What's next?
