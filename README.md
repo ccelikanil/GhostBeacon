@@ -49,8 +49,8 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 **Explanation of **"Figure #5"** is as follows:**
 - User first inputs an SSID value, **"RFC6797"**, followed by the duration value, **"30"**.
-- Program finds **4** unique access points with given SSID and saves them into the comparison list.
-- After completing Beacon listening, program does it's calculation depending on following code:
+- Program finds **4** unique access points (in this particular example) with given SSID and saves them into the comparison list.
+- After completing Beacon sniffing, program does it's calculation depending on following code:
 
   ```
   Pseudo-code of lines 271..294 in GhostBeacon.py
@@ -102,8 +102,27 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> Figure #9 - Hidden AP Spotter Module </p>
 
 <p align="center"> <img src="rsc/readme-screenshots/9_hiddenap_probehunt.png" /> </p>
-<p align="center"> Figure #10 - Hunting Hidden AP's SSID Value </p>
+<p align="center"> Figure #10 - Sample Run: Hunting Hidden AP's SSID Value </p>
 
+**Explanation of "Figur #10" is as follows:
+- User inputs a timeout value for Beacon sniffing.
+- See below:
+
+```
+...
+
+try:
+		sniff(iface=wirelessInterfaces[0], prn=checkHiddenBeacon, store=0, timeout=timeout)
+		print("[!] Hunting for probes...\n")
+		sniff(iface=wirelessInterfaces[0], prn=checkProbeResponse, store=0, timeout=timeout)
+
+...
+```
+<p align="center"> Code Snippet #2 - Function Calls for "checkHiddenBeacon" and "checkProbeResponse" </p>
+
+- In above snippet, since **"Probe Response"** sniffing is done after Beacon sniffing, the same timeout value needs to be applied in here and that's why we have to wait for ``timeout*2`` seconds.
+- Program first discovers **"Beacon Frames"** and checks whether the SSID value is hidden in that specific Beacon Frame packet.
+- Determining whether the SSID is hidden or not is pretty simple and can be done in two ways: **First way is:** if **"Clear Beacons"** are being sent, that is, if the SSID length is zero, this means that the SSID is hidden. **Second way is:** If SSID has **"Null Bytes (\000)"** inside it's value, this means that that SSID is also hidden. Luckily, we can guess the SSID length by counting null bytes inside the SSID info.    
 
 ## What's next?
 
