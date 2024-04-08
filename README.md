@@ -82,8 +82,9 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
   ```
 <p align="center"> Code Snippet #1 - Pseudo-code of Rogue (Fake) AP Detection Mechanism </p>
 
-
-
+**Brief explanation:**
+- Rogue (Fake) Access Points generally have no encryption (they are OPN) to fool victims for making them connect to their fake APs and ask the original AP's password by using a Captive Portal. That's why our first check is AP's encryption (i.e. Privacy Bit).
+- Due to 
 
 
 
