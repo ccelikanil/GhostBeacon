@@ -11,11 +11,11 @@
 
 ## How it works?
 
-You can visit my **Medium post** for a long explanation.
+Follow-up the **"Proof-of-Concept (PoC)**" Section.
 
 TL;DR - Basically, provided features are depending on how 802.11 protocol works. 
 
-## Some PoCs
+## Proof-of-Concepts (PoCs) & How It Works
 
 ### Main Menu
 
