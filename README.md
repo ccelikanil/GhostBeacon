@@ -101,6 +101,9 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/8_hiddenap_selectmodule.PNG" /> </p>
 <p align="center"> Figure #9 - Hidden AP Spotter Module </p>
 
+<p align="center"> <img src="rsc/readme-screenshots/9_hiddenap_probehunt.png" /> </p>
+<p align="center"> Figure #10 - Hunting Hidden AP's SSID Value </p>
+
 
 ## What's next?
 
