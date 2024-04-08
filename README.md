@@ -19,7 +19,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 ### Main Menu:
 
-<p align="center"> <img src="rsc/0_mainmenu.png" /> </p>
+<p align="center"> <img src="rsc/0_mainmenu.PNG" /> </p>
 
 
 ## What's next?
