@@ -2,7 +2,7 @@
 
 <p align="center"> <img src="rsc/banner.png" /> </p>                                                                                                                
 
-# CLI-based 802.11 Hidden AP & Rogue (Fake) AP Spotter
+# CLI-based 802.11 Hidden Access Point (AP) & Rogue (Fake) Access Point (AP) Spotter
 
 ## Features:
 
@@ -35,7 +35,29 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/2_fakeap_selectmodule.PNG" /> </p>
 <p align="center"> Figure #3 - Rogue (Fake) AP Spotter Module </p>
 
+- In this module, an ``airodump-ng`` window pops up to display available SSIDs in wireless card's scan range.
+
+<p align="center"> <img src="rsc/readme-screenshots/3_fakeap_spawnairodump.PNG" /> </p>
+<p align="center"> Figure #4 - airodump-ng </p>
+
+- Then, users are asked to enter an SSID value to check if there's any rogue (fake) access point with same SSID is present.
+- Also, users are asked to enter a value for packet sniffing duration.
+- When these inputs are provided, the program starts to sniff **"Beacon Frames"** in the area and saves all access points with unique BSSID (MAC address) values into a list.
+
+<p align="center"> <img src="rsc/readme-screenshots/4_fakeap_spotopn_privacy.PNG" /> </p>
+<p align="center"> Figure #5 - Sample Run: Spotting Rogue (Fake) Access Points </p>
+
+**Explanation of **"Figure #5"** is as follows:
 - 
+
+
+
+
+
+
+
+
+
 
 ## What's next?
 
