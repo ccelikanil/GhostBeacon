@@ -174,6 +174,23 @@ See a **"Beacon Frame"** w/Hidden SSID information & **"Probe Response"** w/Hidd
 
 ## What's next? & Current Roadmap for this project
 
-...
+### For Rogue (Fake) Access Point Spotter Module, following features will be added:
+
+- Rogue AP spotting decision mechanism will be improved: **"Average Uptime Calculation"** will be included.
+- TX median *may* be calculated for better approximation.
+- **"Organizational Unique Identifier (OUI)"** support will be included to separate Rogue APs from their vendor information.
+- **"Captive Portal"** detection mechanism will be included.
+- Certificate inspection mechanism will be included for 802.1x (Enterprise) networks.
+- **"Deauthentication Attacks"** will be included to use **Denial of Service (DoS)** attacks against suspicious APs. 
+
+### For Hidden Access Point Spotter Module, following features will be added:
+
+- Module will be divided into two sections: **"Passive Reconnaissance"** & **"Active Reconnaissance"**
+- **"Passive Reconnaissance"** will keep **"Probe Response"** analysis, will add additional features for passive listening.
+- **"Active Reconnaissance"** will include **"Deauthentication Attacks"** to force connected clients for disconnecting them from target AP & reconnecting to the AP.
+
+
+*Any other features are open for suggestion, please do not hesitate to recommend your ideas.*
+
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/anilcelik) 
