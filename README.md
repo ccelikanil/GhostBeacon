@@ -9,13 +9,9 @@
 1. 802.11 Rogue (Fake) Access Point Spotter
 2. 802.11 Hidden Access Point Spotter
 
-## How it works?
-
-You can visit my **Medium post** for a long explanation.
+## Proof-of-Concepts (PoCs) & How it works
 
 TL;DR - Basically, provided features are depending on how 802.11 protocol works. 
-
-## Some PoCs
 
 ### Main Menu
 
