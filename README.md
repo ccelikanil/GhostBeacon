@@ -100,7 +100,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/9_hiddenap_probehunt.png" /> </p>
 <p align="center"> Figure #10 - Sample Run: Hunting Hidden AP's SSID Value </p>
 
-**Explanation of "Figur #10" is as follows:
+**Explanation of "Figure #10" is as follows:**
 - User inputs a timeout value for Beacon sniffing.
 - See below:
 
