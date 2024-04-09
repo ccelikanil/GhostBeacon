@@ -168,11 +168,9 @@ See a **"Beacon Frame"** w/Hidden SSID information & **"Probe Response"** w/Hidd
 <p align="center"> Figure #15 - 802.11 Beacon Frame (w/Hidden SSID information) </p>
 
 <p align="center"> <img src="rsc/readme-screenshots/hiddenssid_proberesponse.png" /> </p>
-<p align="center"> Figure #16 - 802.11 Probe Response (Hidden SSID revealed) </p>
+<p align="center"> Figure #16 - 802.11 Probe Response (Hidden SSID revealed) </p
 
-```
-...
-```
+### Other methods to detect Hidden SSID information *(see [!["Roadmap"](https://github.com/ccelikanil/GhostBeacon?tab=readme-ov-file#whats-next--current-roadmap-for-this-project)] Section* 
 
 ## What's next? & Current Roadmap for this project
 
