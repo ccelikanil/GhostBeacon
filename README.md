@@ -142,10 +142,22 @@ We will be focusing on **3 *(three)*** frames in below figure: **"Beacon Frames"
 - **"SSID"** and **"Channel Number"** sections are also set to tell clients that what this AP's name and which channel that it is currently present. **"Channel Number"** is also another important point because Access Point and the Client should be on the same channel number for a successful connection.
 - Other information about this frame class is irrelevant for now.
 
-- When a **"STATION/STA"** *- or Client* wants to connect to a specific Access Point, it simply needs to send a **"Probe Request"** containing corresponding AP's **"SSID"** information and it's **"Channel Number"**:
+- When a **"STATION/STA"** *- or Client* wants to connect to a specific Access Point, it simply needs to send a **"Probe Request"** containing corresponding AP's **"SSID"** information and their **"Channel Number"**:
 
 <p align="center"> <img src="rsc/readme-screenshots/proberequest.png" /> </p>
 <p align="center"> Figure #13 - 802.11 Probe Request </p>
+
+- In a **"Probe Request"** packet, we can see that the **"Destination Address"** and **"Receiver Address"** values are ``FF:FF:FF:FF:FF:FF``, similar to a **"Beacon Frame"**. This means that clients are sending out their connection requests as broadcasts signals also.
+- Respectively, **"Transmitter Address"** and **"Source Address"** sections are the values of client's MAC address *- client BSSID*.
+- Lastly, the **"SSID"** value and **"Channel Number"** of target AP is specified in this packet to tell APs that somebody wants to connect to a nearby AP with specified SSID information and given channel number *- if possible*.
+- **Note:** Clients doesn't have to be on the same channel with the AP before connection. Clients offer a channel number to APs to see whether they are available on that channel and APs offer their own channel number to clients otherwise.    
+
+We understood the first communication between an Access Point and a Client up to now. Where is the important part?
+
+See a **"Probe Response"** frame below *(w/o Hidden SSID information - everything's normal)*:
+
+<p align="center"> <img src="rsc/readme-screenshots/proberesponse.png" /> </p>
+<p align="center"> Figure #14 - 802.11 Probe Repsonse </p>
 
 
 ```
