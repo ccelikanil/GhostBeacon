@@ -137,12 +137,15 @@ We will be focusing on **3 *(three)*** frames in below figure: **"Beacon Frames"
 <p align="center"> <img src="rsc/readme-screenshots/beaconframe.png" /> </p>
 <p align="center"> Figure #12 - 802.11 Beacon Frame </p>
 
-- Note here that, a **"Beacon Frame"**'s key elements are **"Source Address"** and **"Transmitter Address"** has AP's MAC address *- namely, AP's BSSID*
+- Note that, a **"Beacon Frame"**'s key elements are **"Source Address"** and **"Transmitter Address"** has AP's MAC address *- namely, AP's BSSID*
 - **"Receiver Address"** and **"Transmitter Address"** values are ``FF:FF:FF:FF:FF:FF``, which means the packet is being sent as **Broadcast**.
 - **"SSID"** and **"Channel Number"** sections are also set to tell clients that what this AP's name and which channel that it is currently present. **"Channel Number"** is also another important point because Access Point and the Client should be on the same channel number for a successful connection.
 - Other information about this frame class is irrelevant for now.
 
-- 
+- When a **"STATION/STA"** *- or Client* wants to connect to a specific Access Point, it simply needs to send a **"Probe Request"** containing corresponding AP's **"SSID"** information and it's **"Channel Number"**:
+
+<p align="center"> <img src="rsc/readme-screenshots/proberequest.png" /> </p>
+<p align="center"> Figure #13 - 802.11 Probe Request </p>
 
 
 ```
