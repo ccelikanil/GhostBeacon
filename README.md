@@ -159,6 +159,12 @@ See a **"Probe Response"** frame below *(w/o Hidden SSID information - everythin
 <p align="center"> <img src="rsc/readme-screenshots/proberesponse.png" /> </p>
 <p align="center"> Figure #14 - 802.11 Probe Repsonse </p>
 
+- In a **"Probe Response"** packet, **"Destination Address"** and **"Receiver Address"** values are the same values we had in **"Probe Request"** packet's **"Transmitter Address"** and **"Source Address"** sections. Which means that a **"Probe Response"** packet is sending out from AP to the client.
+- What is important in here is that whether the SSID information is hidden or not, Access Points **HAS TO** send out their correct SSID information once they receive a a **"Probe Request"** related with them. By leveraging this *"feature"*, we can identify the correct SSID information by sniffing **"Probe Response"** packets.    
+
+See a **"Probe Response"** frame below *(w/ Hidden SSID information)*:
+
+
 
 ```
 ...
