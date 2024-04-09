@@ -127,6 +127,8 @@ How hidden SSID values being captured and what is the relationship with **"Probe
 
 Let's go deeper:
 
+We will be focusing on **3 (three)** frames in below figure: **"Beacon Frames"**, **"Probe Requests"** & **"Probe Responses"**
+
 <p align="center"> <img src="rsc/readme-screenshots/ap_sta_communication.png" /> </p>
 <p align="center"> Figure #11 - Communication Between Access Point (AP) and Client (Station/STA) </p>
 
@@ -140,6 +142,7 @@ Let's go deeper:
 - **"SSID"** and **"Channel Number"** sections are also set to tell clients that what this AP's name and which channel that it is currently present. **"Channel Number"** is also another important point because Access Point and the Client should be on the same channel number for a successful connection.
 - Other information in this packet is irrelevant for now.
 
+- 
 
 
 ```
