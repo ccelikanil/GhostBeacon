@@ -134,6 +134,14 @@ Let's go deeper:
 <p align="center"> <img src="rsc/readme-screenshots/ap_sta_communication.png" /> </p>
 <p align="center"> Figure #11 - Communication Between Access Point (AP) and Client (Station/STA) </p>
 
+- Like previously said, AP's need to send **"Beacon Frames"** to tell nearby clients that they are ready for connection.
+
+<p align="center"> <img src="rsc/readme-screenshots/beaconframe.png" /> </p>
+<p align="center"> Figure #12 - 802.11 Beacon Frame </p>
+
+
+- If a client wants to  
+
 ```
 ...
 ```
