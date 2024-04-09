@@ -104,7 +104,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> <img src="rsc/readme-screenshots/9_hiddenap_probehunt.png" /> </p>
 <p align="center"> Figure #10 - Sample Run: Hunting Hidden AP's SSID Value </p>
 
-**Explanation of "Figure #10" is as follows:**
+**Explanation of "Figur #10" is as follows:
 - User inputs a timeout value for Beacon sniffing.
 - See below:
 
@@ -124,7 +124,15 @@ try:
 - In above snippet, since **"Probe Response"** sniffing is done after Beacon sniffing, the same timeout value needs to be applied in here and that's why we have to wait for ``timeout*2`` seconds.
 - Program first discovers **"Beacon Frames"** and checks whether the SSID value is hidden in that specific Beacon Frame packet.
 - Determining whether the SSID is hidden or not is pretty simple and can be done in two ways: **First way is:** if **"Clear Beacons"** are being sent, that is, if the SSID length is zero, this means that the SSID is hidden. **Second way is:** If SSID has **"Null Bytes (``\000``)"** inside it's value, this means that that SSID is also hidden. Luckily, we can guess the SSID length by counting null bytes inside the SSID info.
-- How hidden SSID values being captured and what is the relationship with **"Probe Response"** packets? Well, there are couple of different ways for finding out the real values for hidden SSIDs. What we are currently doing in this program's first version is as follows:
+
+How hidden SSID values being captured and what is the relationship with **"Probe Response"** packets? Well, there are couple of different ways for finding out the real values for hidden SSIDs. What we are currently doing in this program's first version is as follows:
+- When you set an AP to hide it's SSID info, you are basically telling that AP to hide it's SSID information on the **"Beacon Frames"** that it broadcasts. **"Beacon Frames"** are the packets that APs broadcasts to let every STATION (STA) *- i.e. clients* nearby that they exist and available for connection requests. When this information *- namely, the SSID* is hidden, naturally, nobody would be able to send any connection request to this AP, except the ones having the correct information.
+- However, it's not so hard to identify this *hidden* information.
+
+Let's go deeper:
+
+<p align="center"> <img src="rsc/readme-screenshots/ap_sta_communication.png" /> </p>
+<p align="center"> Figure #11 - Communication Between Access Point (AP) and Client (Station/STA) </p>
 
 ```
 ...
