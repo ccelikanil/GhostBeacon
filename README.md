@@ -181,7 +181,8 @@ See a **"Beacon Frame"** w/Hidden SSID information & **"Probe Response"** w/Hidd
 - **"Organizational Unique Identifier (OUI)"** support will be included to separate Rogue APs from their vendor information.
 - **"Captive Portal"** detection mechanism will be included.
 - Certificate inspection mechanism will be included for 802.1x (Enterprise) networks.
-- **"Deauthentication Attacks"** will be included to use **Denial of Service (DoS)** attacks against suspicious APs. 
+- **"Deauthentication Attacks"** will be included to use **Denial of Service (DoS)** attacks against suspicious APs.
+- APs having similar SSIDs to the original SSID will also be spotted. 
 
 ### For Hidden Access Point Spotter Module, following features will be added:
 
