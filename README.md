@@ -30,7 +30,7 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 
 ## Workflow
 
-<p align="center"> <img src="rsc/readme-screenshots/FAPS.png" /> </p>
+<p align="center"> <img src="rsc/readme-screenshots/FAPS_1.png" /> </p>
 <p align="center"> Figure #3 - Rogue (Fake) AP Spotter Module Workflow </p>
 
 <p align="center"> <img src="rsc/readme-screenshots/2_fakeap_selectmodule.PNG" /> </p>
