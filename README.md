@@ -13,7 +13,10 @@
 
 TL;DR - Basically, provided features are depending on how 802.11 protocol works. 
 
-### Main Menu
+### Main Execution Flow & Main Menu
+
+<p align="center"> <img src="rsc/readme-screenshots/MainExec_Flow_1.png" /> </p>
+<p align="center"> Figure #1 - Main Execution Flow </p>
 
 <p align="center"> <img src="rsc/readme-screenshots/0_mainmenu.PNG" /> </p>
 <p align="center"> Figure #1 - Main Menu </p>
@@ -98,6 +101,11 @@ TL;DR - Basically, provided features are depending on how 802.11 protocol works.
 <p align="center"> Figure #9 - Sample Run: Spotting Rogue (Fake) Access Points </p>
 
 ### Module #2: Hidden Access Point Spotter 
+
+## Workflow
+
+<p align="center"> <img src="rsc/readme-screenshots/HAPS_1.png" /> </p>
+<p align="center"> Figure #10 - Hidden AP Spotter Module </p>
 
 <p align="center"> <img src="rsc/readme-screenshots/8_hiddenap_selectmodule.PNG" /> </p>
 <p align="center"> Figure #10 - Hidden AP Spotter Module </p>
