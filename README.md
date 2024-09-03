@@ -142,7 +142,7 @@ Let's go deeper:
 
 We will be focusing on **3 *(three)*** frames in below figure: **"Beacon Frames"**, **"Probe Requests"** & **"Probe Responses"**
 
-<p align="center"> <img src="rsc/readme-screenshots/ap_sta_communication.png" /> </p>
+<p align="center"> <img src="rsc/readme-screenshots/80211_BasicCommunication_1.png" /> </p>
 <p align="center"> Figure #14 - Communication Between Access Point (AP) and Client (Station/STA) </p>
 
 - Like previously said, AP's need to send **"Beacon Frames"** to tell nearby clients that they are ready for connection.
