@@ -7,7 +7,7 @@ import signal
 import sys
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from scapy.all import *
 
 # Global Variables
@@ -142,7 +142,7 @@ def checkBeacon(packet):
 			# Calculate & Sort Uptime
 
 			timestamp = packet[Dot11].timestamp
-			epoch = datetime.utcfromtimestamp(0)
+			epoch = datetime.fromtimestamp(0, tz=timezone.utc)
 			beaconTime = epoch + timedelta(microseconds=timestamp)  # actual uptime + epoch
 			uptime = beaconTime - epoch
 			uptimeStr = str(uptime).split('.')[0]
@@ -437,7 +437,7 @@ def safeExit():
 
 def main():
 	
-	print("""
+	print(r"""
 	
 	  /$$$$$$  /$$                             /$$     /$$$$$$$                                                   
 	 /$$__  $$| $$                            | $$    | $$__  $$                                                  
