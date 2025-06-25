@@ -1,6 +1,6 @@
 # GhostBeacon v1.0
 
-<p align="center"> <img src="rsc/banner.png" /> </p>                                                                                                                
+<p align="center"> <img src="rsc/banner_new.png" /> </p>                                                                                                                
 
 # CLI-based 802.11 Hidden Access Point (AP) & Rogue (Fake) Access Point (AP) Spotter
 
