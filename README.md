@@ -1,5 +1,7 @@
 # GhostBeacon v1.0
 
+![Black Hat USA Arsenal 2025](https://img.shields.io/badge/Black%20Hat%20USA%20Arsenal%202025-8A2BE2) ![Black Hat SecTor Arsenal 2024](https://img.shields.io/badge/Black%20Hat%20SecTor%20Arsenal%202024-8A2BE2)
+
 <p align="center"> <img src="rsc/banner_new.png" /> </p>                                                                                                                
 
 # CLI-based 802.11 Hidden Access Point (AP) & Rogue (Fake) Access Point (AP) Spotter
