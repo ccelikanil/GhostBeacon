@@ -6,6 +6,8 @@
 
 # CLI-based 802.11 Hidden Access Point (AP) & Rogue (Fake) Access Point (AP) Spotter
 
+## Black Hat USA Arsenal 2025 Presentation Video: https://youtu.be/ArGmNjTZVew
+
 ## Features:
 
 1. 802.11 Rogue (Fake) Access Point Spotter
